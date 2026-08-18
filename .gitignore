@@ -3,3 +3,8 @@
 node_modules/
 *.log
 cluade拉的5坨/
+
+# 临时字体预览文件（页面使用的 GenYoMin 字体需纳入版本控制）
+assets/fonts/SmileySans-Oblique.ttf.woff2
+assets/fonts/I.Ming-8.10.ttf
+font-preview.html

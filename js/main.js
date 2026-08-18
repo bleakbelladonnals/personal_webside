@@ -53,7 +53,7 @@
         const p = Math.min((now - start) / duration, 1);
         const eased = 1 - Math.pow(1 - p, 3); // easeOutCubic
         const value = target * eased;
-        el.textContent = value.toFixed(decimals) + suffix;
+        el.innerHTML = value.toFixed(decimals) + (suffix ? '<span class="suffix">' + suffix + '</span>' : '');
         if (p < 1) requestAnimationFrame(tick);
       };
       requestAnimationFrame(tick);
@@ -71,7 +71,7 @@
       counters.forEach((el) => cio.observe(el));
     } else {
       counters.forEach((el) => {
-        el.textContent = el.dataset.count + (el.dataset.suffix || '');
+        el.innerHTML = el.dataset.count + (el.dataset.suffix ? '<span class="suffix">' + el.dataset.suffix + '</span>' : '');
       });
     }
   }
