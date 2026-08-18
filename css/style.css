@@ -6,22 +6,36 @@
 /* 源樣明體 GenYo Ming（源自思源宋体，本地字体文件） */
 @font-face {
   font-family: "GenYoMin";
-  src: url("../assets/fonts/GenYoMin2TC-R.otf") format("opentype");
+  src: url("../assets/fonts/GenYoMin2TC-R.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: "GenYoMin";
-  src: url("../assets/fonts/GenYoMin2TC-M.otf") format("opentype");
+  src: url("../assets/fonts/GenYoMin2TC-M.woff2") format("woff2");
   font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: "GenYoMin";
-  src: url("../assets/fonts/GenYoMin2TC-L.otf") format("opentype");
+  src: url("../assets/fonts/GenYoMin2TC-L.woff2") format("woff2");
   font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Fraunces";
+  src: url("../assets/fonts/Fraunces-Latin.woff2") format("woff2");
+  font-weight: 300 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("../assets/fonts/JetBrainsMono-Latin.woff2") format("woff2");
+  font-weight: 400 500;
   font-style: normal;
   font-display: swap;
 }
