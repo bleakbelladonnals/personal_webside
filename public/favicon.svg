@@ -1,0 +1,6 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="g" x1="14" y1="6" x2="50" y2="59"><stop stop-color="#DFFBFF"/><stop offset=".4" stop-color="#35C8F4"/><stop offset=".72" stop-color="#087FD1"/><stop offset="1" stop-color="#004B97"/></linearGradient></defs>
+  <path d="M32 3C26 14 12 27 12 42c0 12 9 20 20 20s20-8 20-20C52 27 38 14 32 3Z" fill="url(#g)" stroke="#F2FFFF" stroke-width="2"/>
+  <path d="M20 34c5-12 19-18 28-12-7-10-13-16-16-19-5 9-13 18-17 27Z" fill="#fff" opacity=".55"/>
+  <text x="32" y="48" text-anchor="middle" fill="white" font-family="Arial,sans-serif" font-size="18" font-weight="800" letter-spacing="-1">DG</text>
+</svg>
