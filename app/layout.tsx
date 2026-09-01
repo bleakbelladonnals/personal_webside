@@ -11,13 +11,13 @@ export const metadata: Metadata = {
     locale: 'zh_CN',
     title: 'DonnaOS — 甘淑琪的 AI 产品经理作品集',
     description: '把复杂 AI 能力，做成可落地、可评测、可持续迭代的产品。',
-    images: [{ url: '/og.png', width: 1200, height: 630, alt: 'DonnaOS AI 产品经理作品集' }],
+    images: [{ url: '/og-v2.png', width: 1200, height: 630, alt: 'DonnaOS AI 产品经理作品集桌面' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'DonnaOS — 甘淑琪的 AI 产品经理作品集',
     description: '把复杂 AI 能力，做成可落地、可评测、可持续迭代的产品。',
-    images: ['/og.png'],
+    images: ['/og-v2.png'],
   },
 };
 

@@ -1,17 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useReducer, useRef } from 'react';
-import {
-  BriefcaseBusiness,
-  ContactRound,
-  FileText,
-  FolderOpen,
-  Mail,
-  Minus,
-  Sparkles,
-  Wrench,
-  X,
-} from 'lucide-react';
+import { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { AppContent, appMeta } from './app-content';
 import {
   createInitialWindowState,
@@ -20,23 +9,33 @@ import {
   type WindowRecord,
 } from '@/lib/window-state';
 
-const apps: Array<{ id: AppId; label: string; icon: typeof FileText; color: string }> = [
-  { id: 'brief', label: 'Brief', icon: FileText, color: 'blue' },
-  { id: 'projects', label: 'Case Studies', icon: FolderOpen, color: 'folder' },
-  { id: 'toolkit', label: 'AI PM Toolkit', icon: Wrench, color: 'tool' },
-  { id: 'experience', label: 'Experience', icon: BriefcaseBusiness, color: 'graphite' },
-  { id: 'about', label: 'About / Contact', icon: ContactRound, color: 'aqua' },
+const apps: Array<{ id: AppId; label: string; glyph: string }> = [
+  { id: 'brief', label: 'recruiter brief', glyph: '📄' },
+  { id: 'projects', label: 'case studies', glyph: '📁' },
+  { id: 'toolkit', label: 'AI PM toolkit', glyph: '🛠️' },
+  { id: 'experience', label: 'experience', glyph: '💼' },
+  { id: 'about', label: 'about Donna', glyph: '👩🏻‍💻' },
+  { id: 'contact', label: 'contact', glyph: '✉️' },
 ];
 
 const validIds = new Set<AppId>(apps.map((item) => item.id));
+const bootLines = [
+  'DonnaOS v2.0',
+  'loading portfolio kernel........ ok',
+  'mounting /case-studies.......... ok',
+  'starting window manager......... ok',
+  'checking recruiter brief........ ready',
+  'welcome, hiring team.',
+];
 
-function syncQuery(id: AppId) {
+function syncQuery(id?: AppId) {
   const url = new URL(window.location.href);
-  url.searchParams.set('app', id);
-  window.history.replaceState({}, '', `${url.pathname}?${url.searchParams.toString()}`);
+  if (id) url.searchParams.set('app', id);
+  else url.searchParams.delete('app');
+  window.history.replaceState({}, '', `${url.pathname}${url.search}`);
 }
 
-function AquaWindow({
+function DesktopWindow({
   record,
   openApp,
   onClose,
@@ -55,11 +54,12 @@ function AquaWindow({
 
   const handlePointerMove = (event: React.PointerEvent<HTMLElement>) => {
     if (!dragRef.current) return;
-    const width = Math.min(record.width, window.innerWidth - 124);
-    const height = Math.min(record.height, window.innerHeight - 190);
-    const maxX = Math.max(104, window.innerWidth - width - 12);
-    const maxY = Math.max(44, window.innerHeight - height - 86);
-    const x = Math.max(104, Math.min(maxX, dragRef.current.x + event.clientX - dragRef.current.startX));
+    const win = event.currentTarget.parentElement;
+    const width = win?.offsetWidth ?? record.width;
+    const height = win?.offsetHeight ?? record.height;
+    const maxX = Math.max(8, window.innerWidth - width - 8);
+    const maxY = Math.max(42, window.innerHeight - height - 48);
+    const x = Math.max(8, Math.min(maxX, dragRef.current.x + event.clientX - dragRef.current.startX));
     const y = Math.max(42, Math.min(maxY, dragRef.current.y + event.clientY - dragRef.current.startY));
     onMove(x, y);
   };
@@ -68,20 +68,14 @@ function AquaWindow({
 
   return (
     <section
-      className="aqua-window window-frame"
+      className="os-window"
       data-app-window={record.id}
-      style={{
-        left: record.x,
-        top: record.y,
-        width: record.width,
-        height: record.height,
-        zIndex: record.z,
-      }}
+      style={{ left: record.x, top: record.y, width: record.width, height: record.height, zIndex: record.z }}
       onPointerDown={onFocus}
       aria-labelledby={`window-title-${record.id}`}
     >
       <header
-        className="window-titlebar draggable-titlebar"
+        className="os-titlebar"
         onPointerDown={(event) => {
           if ((event.target as HTMLElement).closest('button')) return;
           dragRef.current = { startX: event.clientX, startY: event.clientY, x: record.x, y: record.y };
@@ -91,19 +85,19 @@ function AquaWindow({
         onPointerMove={handlePointerMove}
         onPointerUp={(event) => {
           dragRef.current = null;
-          event.currentTarget.releasePointerCapture(event.pointerId);
+          if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
         }}
         onPointerCancel={() => { dragRef.current = null; }}
       >
-        <div className="traffic-controls">
-          <button type="button" className="traffic-close" aria-label={`关闭 ${appMeta[record.id].title}`} onClick={onClose}><X /></button>
-          <button type="button" className="traffic-min" aria-label={`最小化 ${appMeta[record.id].title}`} onClick={onMinimize}><Minus /></button>
-          <span className="traffic-zoom" aria-hidden="true" />
-        </div>
-        <span id={`window-title-${record.id}`}>{appMeta[record.id].title}</span>
-        <span className="window-title-meta">{appMeta[record.id].code}</span>
+        <span className="os-title-dots" aria-hidden="true"><i /><i /><i /></span>
+        <span id={`window-title-${record.id}`} className="os-title-text">{appMeta[record.id].title}</span>
+        <span className="os-title-meta">{appMeta[record.id].code}</span>
+        <span className="os-window-actions">
+          <button type="button" aria-label={`最小化 ${appMeta[record.id].title}`} onClick={onMinimize}>─</button>
+          <button type="button" aria-label={`关闭 ${appMeta[record.id].title}`} onClick={onClose}>×</button>
+        </span>
       </header>
-      <div className={`window-content window-content--${record.id}`}>
+      <div className={`os-window-body os-window-body--${record.id}`}>
         <AppContent id={record.id} openApp={openApp} />
       </div>
     </section>
@@ -111,6 +105,11 @@ function AquaWindow({
 }
 
 export function DonnaDesktop() {
+  const [phase, setPhase] = useState<'welcome' | 'boot' | 'desktop'>('welcome');
+  const [bootIndex, setBootIndex] = useState(0);
+  const [clock, setClock] = useState('--:--:--');
+  const [selectedIcon, setSelectedIcon] = useState<AppId | null>(null);
+  const [isCoarse, setIsCoarse] = useState(false);
   const [state, dispatch] = useReducer(windowReducer, undefined, createInitialWindowState);
 
   const openApp = (id: AppId) => {
@@ -121,53 +120,127 @@ export function DonnaDesktop() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const requested = params.get('app') as AppId | null;
-    if (requested && validIds.has(requested)) dispatch({ type: 'OPEN', id: requested });
+    let requestedTimer: number | undefined;
+    if (requested && validIds.has(requested)) {
+      requestedTimer = window.setTimeout(() => {
+        dispatch({ type: 'OPEN', id: requested });
+        setPhase('desktop');
+      }, 0);
+    }
+
+    const media = window.matchMedia('(pointer: coarse)');
+    const updatePointer = () => setIsCoarse(media.matches);
+    const pointerTimer = window.setTimeout(updatePointer, 0);
+    media.addEventListener('change', updatePointer);
+    return () => {
+      if (requestedTimer) window.clearTimeout(requestedTimer);
+      window.clearTimeout(pointerTimer);
+      media.removeEventListener('change', updatePointer);
+    };
   }, []);
+
+  useEffect(() => {
+    const updateClock = () => setClock(new Date().toLocaleTimeString('zh-CN', { hour12: false }));
+    const initialTick = window.setTimeout(updateClock, 0);
+    const timer = window.setInterval(updateClock, 1000);
+    return () => {
+      window.clearTimeout(initialTick);
+      window.clearInterval(timer);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (phase !== 'boot') return;
+    if (bootIndex < bootLines.length) {
+      const timer = window.setTimeout(() => setBootIndex((value) => value + 1), 230);
+      return () => window.clearTimeout(timer);
+    }
+    const timer = window.setTimeout(() => setPhase('desktop'), 420);
+    return () => window.clearTimeout(timer);
+  }, [phase, bootIndex]);
 
   const activeId = useMemo(() => {
     const active = Object.values(state.windows)
       .filter((item) => item.open && !item.minimized)
       .sort((a, b) => b.z - a.z)[0];
-    return active?.id ?? 'brief';
+    return active?.id ?? null;
   }, [state.windows]);
+
+  const openWindows = useMemo(() => apps.filter(({ id }) => state.windows[id].open), [state.windows]);
 
   const closeWindow = (id: AppId) => {
     dispatch({ type: 'CLOSE', id });
-    const url = new URL(window.location.href);
-    url.searchParams.delete('app');
-    window.history.replaceState({}, '', `${url.pathname}${url.search ? url.search : ''}`);
+    if (activeId === id) syncQuery();
   };
+
+  if (phase === 'welcome') {
+    return (
+      <main className="welcome-screen">
+        <div className="welcome-stack">
+          <h1 className="os-logo">DONNA<span>OS</span></h1>
+          <section className="welcome-terminal" aria-label="DonnaOS system profile">
+            <header><span className="os-title-dots" aria-hidden="true"><i /><i /><i /></span><b>~/welcome</b></header>
+            <div>
+              <span className="welcome-avatar" aria-hidden="true">DG</span>
+              <dl>
+                <div><dt>user</dt><dd>Donna Gan</dd></div>
+                <div><dt>role</dt><dd>AI Product Manager</dd></div>
+                <div><dt>base</dt><dd>Beijing</dd></div>
+                <div><dt>focus</dt><dd>Agent · Workflow · Eval</dd></div>
+              </dl>
+            </div>
+          </section>
+          <button id="enter-donnaos" className="enter-os" type="button" onClick={() => { setBootIndex(0); setPhase('boot'); }}>
+            ▸ enter portfolio
+          </button>
+        </div>
+      </main>
+    );
+  }
+
+  if (phase === 'boot') {
+    return (
+      <main className="boot-screen" aria-live="polite">
+        <pre>{bootLines.slice(0, bootIndex).join('\n')}</pre>
+        <div className="boot-progress" aria-hidden="true"><i style={{ width: `${Math.round((bootIndex / bootLines.length) * 100)}%` }} /></div>
+      </main>
+    );
+  }
 
   return (
     <main className="desktop-shell">
-      <div className="contour-map" aria-hidden="true" />
-
-      <header className="menu-bar">
-        <div className="menu-left">
-          <button type="button" className="brand-button" onClick={() => openApp('brief')} aria-label="打开 Recruiter Brief">
-            <span className="brand-drop" aria-hidden="true">DG</span>
-          </button>
+      <header className="os-topbar">
+        <div>
+          <button type="button" onClick={() => openApp('brief')} aria-label="打开 Recruiter Brief">DG</button>
           <strong>DonnaOS</strong>
-          <button type="button" className="menu-item" onClick={() => openApp('brief')}>Portfolio</button>
-          <button type="button" className="menu-item" onClick={() => openApp('projects')}>Projects</button>
-          <button type="button" className="menu-item" onClick={() => openApp('about')}>Contact</button>
+          <button type="button" onClick={() => openApp('projects')}>projects</button>
+          <button type="button" onClick={() => openApp('contact')}>contact</button>
         </div>
-        <div className="menu-right">
-          <span className="status-dot" aria-hidden="true" />
-          <span>OPEN TO WORK</span>
-          <time dateTime="2026-09-01">SEP 1, 2026</time>
-        </div>
+        <div><span>● OPEN TO WORK</span><time>{clock}</time></div>
       </header>
 
-      <section className="desktop-mode" aria-label="DonnaOS desktop">
-        <div className="desktop-icons" aria-label="Desktop shortcuts">
-          <button type="button" onClick={() => openApp('projects')}><FolderOpen /><span>Selected Work</span></button>
-          <button type="button" onClick={() => openApp('toolkit')}><Sparkles /><span>AI PM Toolkit</span></button>
-          <a href="mailto:bleakbelladonnals@gmail.com"><Mail /><span>Email Donna</span></a>
-        </div>
+      <section className="os-desktop" aria-label="DonnaOS desktop" onPointerDown={(event) => { if (event.target === event.currentTarget) setSelectedIcon(null); }}>
+        <ul className="os-icons" aria-label="Desktop applications">
+          {apps.map(({ id, label, glyph }) => (
+            <li key={id}>
+              <button
+                type="button"
+                className={selectedIcon === id ? 'is-selected' : undefined}
+                data-desktop-app={id}
+                onClick={() => { setSelectedIcon(id); if (isCoarse) openApp(id); }}
+                onDoubleClick={() => openApp(id)}
+                onKeyDown={(event) => { if (event.key === 'Enter') openApp(id); }}
+                aria-label={`打开 ${label}`}
+              >
+                <span aria-hidden="true">{glyph}</span>
+                <small>{label}</small>
+              </button>
+            </li>
+          ))}
+        </ul>
 
         {apps.map(({ id }) => (
-          <AquaWindow
+          <DesktopWindow
             key={id}
             record={state.windows[id]}
             openApp={openApp}
@@ -179,35 +252,27 @@ export function DonnaDesktop() {
         ))}
       </section>
 
-      <section className="mobile-mode" aria-label="DonnaOS mobile portfolio">
-        <header className="mobile-app-title">
-          <span>{appMeta[activeId].title}</span>
-          <small>{appMeta[activeId].code}</small>
-        </header>
-        <div className="mobile-app-scroll">
-          <AppContent id={activeId} openApp={openApp} />
-        </div>
-      </section>
-
-      <nav className="dock" aria-label="DonnaOS applications">
-        {apps.map(({ id, label, icon: Icon, color }) => {
-          const current = activeId === id && state.windows[id].open && !state.windows[id].minimized;
+      <footer className="os-taskbar" aria-label="Open windows">
+        {openWindows.map(({ id, label }) => {
+          const record = state.windows[id];
+          const active = id === activeId && !record.minimized;
           return (
             <button
-              type="button"
               key={id}
-              data-dock-app={id}
-              className={`dock-item dock-item--${color} ${current ? 'is-active' : ''}`}
-              onClick={() => openApp(id)}
-              aria-label={`打开 ${label}`}
-              aria-current={current ? 'page' : undefined}
+              type="button"
+              className={active ? 'is-active' : undefined}
+              onClick={() => {
+                if (record.minimized) dispatch({ type: 'OPEN', id });
+                else if (active) dispatch({ type: 'MINIMIZE', id });
+                else dispatch({ type: 'FOCUS', id });
+                syncQuery(id);
+              }}
             >
-              <span><Icon aria-hidden="true" /></span>
-              <small>{label}</small>
+              {label}
             </button>
           );
         })}
-      </nav>
+      </footer>
     </main>
   );
 }

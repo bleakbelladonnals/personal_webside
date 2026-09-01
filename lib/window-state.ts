@@ -1,4 +1,4 @@
-export type AppId = 'brief' | 'projects' | 'toolkit' | 'experience' | 'about';
+export type AppId = 'brief' | 'projects' | 'toolkit' | 'experience' | 'about' | 'contact';
 
 export type WindowRecord = {
   id: AppId;
@@ -24,11 +24,12 @@ export type WindowAction =
   | { type: 'MOVE'; id: AppId; x: number; y: number };
 
 const definitions: Record<AppId, Omit<WindowRecord, 'id' | 'open' | 'minimized' | 'z'>> = {
-  brief: { x: 154, y: 68, width: 1040, height: 690 },
-  projects: { x: 116, y: 88, width: 930, height: 650 },
-  toolkit: { x: 210, y: 96, width: 830, height: 610 },
-  experience: { x: 276, y: 82, width: 740, height: 610 },
-  about: { x: 340, y: 104, width: 720, height: 570 },
+  brief: { x: 142, y: 70, width: 760, height: 584 },
+  projects: { x: 126, y: 92, width: 680, height: 558 },
+  toolkit: { x: 196, y: 84, width: 600, height: 548 },
+  experience: { x: 252, y: 100, width: 560, height: 520 },
+  about: { x: 306, y: 88, width: 520, height: 492 },
+  contact: { x: 362, y: 112, width: 420, height: 340 },
 };
 
 export function createInitialWindowState(): WindowState {

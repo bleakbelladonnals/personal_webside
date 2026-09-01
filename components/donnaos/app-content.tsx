@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowUpRight, CheckCircle2, Code2, Mail, MapPin } from 'lucide-react';
 import { capabilities, cases, experience, featuredCases, profile } from '@/lib/portfolio';
@@ -12,11 +11,12 @@ const heroMetrics = [
 ];
 
 export const appMeta: Record<AppId, { title: string; code: string }> = {
-  brief: { title: 'Recruiter Brief', code: 'PROFILE / HOME' },
-  projects: { title: 'Case Studies', code: 'PROJECTS / 06' },
-  toolkit: { title: 'AI PM Toolkit', code: 'CAPABILITIES / EVIDENCE' },
-  experience: { title: 'Experience', code: 'TIMELINE / 2021–2026' },
-  about: { title: 'About / Contact', code: 'DONNA / CONTACT' },
+  brief: { title: '~/recruiter-brief', code: 'PROFILE / HOME' },
+  projects: { title: '~/case-studies', code: 'PROJECTS / 06' },
+  toolkit: { title: '~/ai-pm-toolkit', code: 'CAPABILITIES / EVIDENCE' },
+  experience: { title: '~/experience', code: 'TIMELINE / 2021–2026' },
+  about: { title: '~/about-donna', code: 'DONNA / ABOUT' },
+  contact: { title: '~/contact', code: 'DONNA / CONTACT' },
 };
 
 function BriefContent({ openApp }: { openApp?: (id: AppId) => void }) {
@@ -151,10 +151,7 @@ function ExperienceContent() {
 function AboutContent() {
   return (
     <div className="about-app">
-      <figure className="portrait-shell">
-        <Image src="/profile-donna.jpg" alt="甘淑琪 Donna Gan" width={640} height={900} priority />
-        <figcaption>DONNA GAN · BEIJING · 2026</figcaption>
-      </figure>
+      <div className="about-avatar" aria-hidden="true">DG</div>
       <div className="about-copy">
         <p className="eyebrow">ABOUT DONNA</p>
         <h1>从空间与行为的设计，走到 AI 产品的系统与边界。</h1>
@@ -167,12 +164,27 @@ function AboutContent() {
           <div><dt>BASE</dt><dd><MapPin aria-hidden="true" />{profile.location}</dd></div>
           <div><dt>STATUS</dt><dd>{profile.status}</dd></div>
         </dl>
-        <div className="contact-links">
-          <a href={`mailto:${profile.email}`}><Mail aria-hidden="true" /><span>Email<b>{profile.email}</b></span></a>
-          <a href={profile.github} target="_blank" rel="noreferrer"><Code2 aria-hidden="true" /><span>GitHub<b>@bleakbelladonnals</b></span></a>
-        </div>
-        <p className="privacy-copy">本站不公开手机号、微信二维码或完整简历文件。</p>
       </div>
+    </div>
+  );
+}
+
+function ContactContent() {
+  return (
+    <div className="contact-app">
+      <p className="eyebrow">LET&apos;S TALK</p>
+      <h1>如果你正在做企业 AI、Agent 工作流或 AI 原生产品，欢迎联系我。</h1>
+      <div className="contact-links">
+        <a href={`mailto:${profile.email}`}>
+          <Mail aria-hidden="true" />
+          <span>Email<b>{profile.email}</b></span>
+        </a>
+        <a href={profile.github} target="_blank" rel="noreferrer">
+          <Code2 aria-hidden="true" />
+          <span>GitHub<b>@bleakbelladonnals</b></span>
+        </a>
+      </div>
+      <p className="privacy-copy">本站不公开手机号、微信二维码或完整简历文件。</p>
     </div>
   );
 }
@@ -182,5 +194,6 @@ export function AppContent({ id, openApp }: { id: AppId; openApp?: (id: AppId) =
   if (id === 'projects') return <ProjectsContent />;
   if (id === 'toolkit') return <ToolkitContent />;
   if (id === 'experience') return <ExperienceContent />;
-  return <AboutContent />;
+  if (id === 'about') return <AboutContent />;
+  return <ContactContent />;
 }

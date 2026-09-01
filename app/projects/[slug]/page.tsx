@@ -32,7 +32,6 @@ export default async function CasePage({ params }: { params: Promise<{ slug: str
 
   return (
     <main className="inner-page case-page">
-      <div className="inner-contours" aria-hidden="true" />
       <SiteNav />
 
       <header className="case-hero">
@@ -44,10 +43,9 @@ export default async function CasePage({ params }: { params: Promise<{ slug: str
             <h2>{project.nameCn}</h2>
             <span>{project.summary}</span>
           </div>
-          <div className="case-hero-badge" aria-hidden="true">
-            <i />
-            <strong>{String(index + 1).padStart(2, '0')}</strong>
-            <span>{project.name.slice(0, 2).toUpperCase()}</span>
+          <div className="case-identity-card" aria-label={`${project.name} case index`}>
+            <header><span aria-hidden="true"><i /><i /><i /></span><b>~/case-study</b></header>
+            <div><small>CASE</small><strong>{String(index + 1).padStart(2, '0')}</strong><span>{project.category}</span></div>
           </div>
         </div>
       </header>

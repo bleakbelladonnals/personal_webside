@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowUpRight, Code2, Mail, MapPin } from 'lucide-react';
 import { SiteNav } from '@/components/donnaos/site-nav';
@@ -15,13 +14,20 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <main className="inner-page about-page">
-      <div className="inner-contours" aria-hidden="true" />
       <SiteNav />
       <section className="about-hero">
-        <figure>
-          <Image src="/profile-donna.jpg" alt="甘淑琪 Donna Gan" width={900} height={1200} priority />
-          <figcaption>DONNA GAN / BEIJING / 2026</figcaption>
-        </figure>
+        <div className="about-terminal-card">
+          <header><span aria-hidden="true"><i /><i /><i /></span><b>~/about-donna</b></header>
+          <div>
+            <strong>DG</strong>
+            <dl>
+              <div><dt>name</dt><dd>甘淑琪 Donna Gan</dd></div>
+              <div><dt>role</dt><dd>{profile.role}</dd></div>
+              <div><dt>base</dt><dd>{profile.location}</dd></div>
+              <div><dt>focus</dt><dd>Agent / Workflow / Eval</dd></div>
+            </dl>
+          </div>
+        </div>
         <div>
           <p>ABOUT DONNA</p>
           <h1>从空间与行为的设计，<br />走到 AI 产品的系统与边界。</h1>

@@ -14,7 +14,6 @@ export const metadata: Metadata = {
 export default function ProjectsPage() {
   return (
     <main className="inner-page projects-page">
-      <div className="inner-contours" aria-hidden="true" />
       <SiteNav />
       <header className="archive-hero">
         <div>
@@ -29,10 +28,10 @@ export default function ProjectsPage() {
       <section className="archive-grid" aria-label="Project case studies">
         {cases.map((project, index) => (
           <Link className="archive-case-card" href={`/projects/${project.slug}`} key={project.slug}>
-            <div className={`case-art case-art--${(index % 3) + 1}`} aria-hidden="true">
-              <span>{String(index + 1).padStart(2, '0')}</span>
-              <i /><i /><i />
-              <strong>{project.name.slice(0, 2).toUpperCase()}</strong>
+            <div className="archive-window-bar">
+              <span aria-hidden="true"><i /><i /><i /></span>
+              <b>~/projects/{project.slug}</b>
+              <small>{String(index + 1).padStart(2, '0')} / 06</small>
             </div>
             <div className="archive-card-copy">
               <p>{project.category} · {project.year}</p>
