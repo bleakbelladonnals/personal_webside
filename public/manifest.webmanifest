@@ -1,0 +1,16 @@
+{
+  "name": "DonnaOS — 甘淑琪的 AI 产品经理作品集",
+  "short_name": "DonnaOS",
+  "description": "企业 AI 0→1、Agent 评测、AI Coding 与开源实践作品集。",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#c8c4e3",
+  "theme_color": "#2d2c3a",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

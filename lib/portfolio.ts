@@ -4,6 +4,30 @@ export type Metric = {
   detail: string;
 };
 
+export type PublicLink = {
+  label: string;
+  href: string;
+  kind: 'github' | 'website' | 'source';
+};
+
+export type ProjectType = 'company-pilot' | 'independent-mvp' | 'open-source';
+
+export type WorkSample = {
+  id: string;
+  type: 'decision' | 'evaluation' | 'workflow' | 'research' | 'open-source';
+  title: string;
+  format: string;
+  disclosure: string;
+  summary: string;
+  items: string[];
+};
+
+export const projectTypeLabels: Record<ProjectType, string> = {
+  'company-pilot': '公司内部试点',
+  'independent-mvp': '个人 MVP',
+  'open-source': '公开开源',
+};
+
 export type CaseStudy = {
   slug: string;
   name: string;
@@ -11,6 +35,10 @@ export type CaseStudy = {
   category: string;
   year: string;
   featured: boolean;
+  projectType: ProjectType;
+  stage: string;
+  validationScope: string;
+  metricNotes: string;
   summary: string;
   audience: string;
   role: string;
@@ -23,15 +51,33 @@ export type CaseStudy = {
   evaluation: string[];
   metrics: Metric[];
   reflection: string;
+  workSamples: WorkSample[];
   capabilities: string[];
-  link?: string;
+  publicLinks: PublicLink[];
 };
 
-export type CapabilityEvidence = {
+export type Strength = {
+  id: 'product-01' | 'agent-eval' | 'ai-coding-open-source' | 'seo-validation';
   name: string;
   code: string;
   description: string;
   evidence: Array<{ project: string; slug: string; note: string }>;
+};
+
+export type LabProject = {
+  slug: string;
+  name: string;
+  nameCn: string;
+  category: string;
+  year: string;
+  stage: string;
+  summary: string;
+  problem: string;
+  approach: string;
+  validationScope: string;
+  guardrails: string[];
+  capabilities: string[];
+  publicLinks: PublicLink[];
 };
 
 export const profile = {
@@ -42,9 +88,9 @@ export const profile = {
   status: 'OPEN TO WORK',
   email: 'bleakbelladonnals@gmail.com',
   github: 'https://github.com/bleakbelladonnals',
-  headline: '把复杂 AI 能力，做成可落地、可评测、可持续迭代的产品。',
+  headline: '从真实业务问题出发，把 Agent 做到可用、可评测、可迭代。',
   intro:
-    '具备企业级 AI 产品从 0 到 1 主导经验，关注 Agent 工作流、人机协作、效果评测与真实业务落地。',
+    '主导企业 AI 产品从 0 到 1，把复杂业务拆为知识、数据、工具与人工确认流程，并用评测闭环推进内部试点。同时持续用 AI Coding、开源协作和 SEO 增长验证产品判断。',
 };
 
 export const cases: CaseStudy[] = [
@@ -55,6 +101,10 @@ export const cases: CaseStudy[] = [
     category: 'ENTERPRISE AI',
     year: '2025–2026',
     featured: true,
+    projectType: 'company-pilot',
+    stage: '内部试点 · 两周业务测试',
+    validationScope: '覆盖销售、仓储、采购 3 个部门，围绕 100 条核心回归用例完成 3 轮迭代。',
+    metricNotes: '内部试点口径；订单金额表示辅助覆盖规模，不代表 AI 新增收入。',
     summary:
       '面向销售、仓储和采购的订单协同 Agent，把产品知识查询、订单物料拆解、库存核对和采购缺口计算组合成可执行、可评测的业务流程。',
     audience: '销售、仓储和采购团队',
@@ -90,7 +140,7 @@ export const cases: CaseStudy[] = [
     evaluation: [
       '将问题拆为意图与槽位、知识检索、工具调用、计算规则、结果事实和交互六层。',
       '建立 100 条核心回归用例，完成三轮 bad case 分类与版本迭代。',
-      '构建 220 条窄任务监督样本参与模型方案验证，格式遵循率由 78% 提升至 96%。',
+      '构建 1,000+ 条覆盖标准问法、口语化表达、多意图请求与异常输入的 SFT 指令样本，格式遵循率由 78% 提升至 96%。',
     ],
     metrics: [
       { value: '12 → 2 min', label: '高频查询耗时', detail: '中位耗时降低约 83%' },
@@ -100,7 +150,37 @@ export const cases: CaseStudy[] = [
     ],
     reflection:
       '企业 Agent 的价值不在模型显得多聪明，而在知识、数据、工具、规则、人和责任边界被设计成可评测的闭环。',
+    workSamples: [
+      {
+        id: 'lumiagent-mvp-matrix',
+        type: 'decision',
+        title: 'MVP 场景优先级矩阵',
+        format: '决策记录 · 1 page',
+        disclosure: '依据项目决策脱敏重绘',
+        summary: '用业务频率、耗时、数据可得性与风险，把五条候选流程收敛为三个首期场景。',
+        items: ['价值 × 可行性', '风险与责任边界', '首期 / 后续范围'],
+      },
+      {
+        id: 'lumiagent-eval-set',
+        type: 'evaluation',
+        title: '100 条核心回归集结构',
+        format: '评测表 · 6 layers',
+        disclosure: '仅展示结构与口径，不含企业数据',
+        summary: '把一次回答拆成意图、检索、工具、计算、事实与交互六层分别判定。',
+        items: ['通过标准', 'Bad case 标签', '版本回归记录'],
+      },
+      {
+        id: 'lumiagent-handoff-map',
+        type: 'workflow',
+        title: '风险节点与人工介入图',
+        format: '流程图 · 7 states',
+        disclosure: '依据试点流程脱敏重绘',
+        summary: '明确参数不足、只读查询失败、高风险结果和未知异常分别如何中断与交接。',
+        items: ['澄清', '有限重试', '人工确认 / 接管'],
+      },
+    ],
     capabilities: ['0→1 产品定义', 'Agent 路由', 'RAG', '效果评测', '跨部门落地'],
+    publicLinks: [],
   },
   {
     slug: 'agentdock',
@@ -109,6 +189,10 @@ export const cases: CaseStudy[] = [
     category: 'AGENT UX',
     year: '2026',
     featured: true,
+    projectType: 'independent-mvp',
+    stage: '可运行个人 MVP',
+    validationScope: '累计记录 200+ 条 Agent 任务，覆盖 60+ 个待确认、异常与人工介入节点。',
+    metricNotes: '任务记录包含真实使用与测试运行，用于验证状态模型，不代表外部用户规模或 PMF。',
     summary:
       '把分散在不同 AI 会话中的运行状态、待确认事项、生成结果与模型成本聚合到统一工作台。',
     audience: '同时运行多个 Agent 与 AI 对话的重度用户',
@@ -153,8 +237,37 @@ export const cases: CaseStudy[] = [
     ],
     reflection:
       '任务数量不是用户价值。产品真正需要验证的，是能否减少漏处理、缩短人工介入的发现时间，并让任务安全恢复。',
+    workSamples: [
+      {
+        id: 'agentdock-state-model',
+        type: 'workflow',
+        title: 'Agent 任务状态模型',
+        format: '状态图 · 5 states',
+        disclosure: '公开 MVP 设计摘要',
+        summary: '统一运行中、待确认、失败、完成和成本异常状态，并定义允许的状态迁移。',
+        items: ['状态定义', '事件与迁移', '恢复条件'],
+      },
+      {
+        id: 'agentdock-intervention-inbox',
+        type: 'decision',
+        title: '人工介入收件箱',
+        format: '交互规格 · Quick Look',
+        disclosure: '公开 MVP 设计摘要',
+        summary: '将“需要人处理”从分散会话中提取为可排序、可解释、可恢复的任务队列。',
+        items: ['风险原因', '待确认动作', '恢复上下文'],
+      },
+      {
+        id: 'agentdock-acceptance',
+        type: 'evaluation',
+        title: '可观测工作台验收表',
+        format: '验收清单 · 4 metrics',
+        disclosure: '公开 MVP 评测摘要',
+        summary: '用发现时间、漏处理率、恢复成功率和巡检次数验证工作台是否减少人工负担。',
+        items: ['发现时间', '漏处理率', '恢复成功率'],
+      },
+    ],
     capabilities: ['Agent UX', '状态模型', '人机协同', '成本治理', 'AI Coding'],
-    link: 'https://github.com/bleakbelladonnals/AgentDock',
+    publicLinks: [{ label: 'GitHub', href: 'https://github.com/bleakbelladonnals/AgentDock', kind: 'github' }],
   },
   {
     slug: 'bondmemo',
@@ -163,6 +276,10 @@ export const cases: CaseStudy[] = [
     category: 'CONSUMER AI',
     year: '2026',
     featured: true,
+    projectType: 'independent-mvp',
+    stage: '种子用户 MVP · 3 轮迭代',
+    validationScope: '面向 50+ 目标用户，累计处理 300+ 聊天片段并生成 200+ 关系事项。',
+    metricNotes: '采纳率与提醒完成率来自产品内行为，不等同于长期留存、现实跟进完成或 PMF。',
     summary:
       '把聊天片段转成经用户确认的关系事项，并在提醒时恢复人物、原话与未结束的关系语境。',
     audience: '容易因忙碌而遗漏亲友后续的职场人',
@@ -208,8 +325,37 @@ export const cases: CaseStudy[] = [
     ],
     reflection:
       '采纳率高只能说明 AI 候选有帮助，不能证明长期留存。最危险的假设是用户是否愿意持续提交私人语境，以及提醒是否真正减少遗漏。',
+    workSamples: [
+      {
+        id: 'bondmemo-extraction-schema',
+        type: 'workflow',
+        title: '关系事项提取结构',
+        format: 'Schema · 6 fields',
+        disclosure: '依据 MVP 结构脱敏重绘',
+        summary: '把人物、原话、承诺、时间、置信度与敏感级别拆开，避免一句模型总结覆盖原始语境。',
+        items: ['原文与推断分离', '置信度', '敏感内容标记'],
+      },
+      {
+        id: 'bondmemo-confirmation',
+        type: 'decision',
+        title: '确认前编辑路径',
+        format: '交互流程 · 4 steps',
+        disclosure: '依据种子用户流程脱敏重绘',
+        summary: 'AI 只生成候选事项；用户可编辑人物、时间和原话后再决定保存。',
+        items: ['候选建议', '编辑与删除', '明确保存'],
+      },
+      {
+        id: 'bondmemo-metric-tree',
+        type: 'evaluation',
+        title: '关系提醒指标口径',
+        format: '指标树 · MVP',
+        disclosure: '不把点击完成等同于现实跟进',
+        summary: '区分建议采纳、提醒查看、标记完成、真实跟进和长期留存，避免虚高结论。',
+        items: ['建议采纳', '到期查看', 'D7 / D30'],
+      },
+    ],
     capabilities: ['用户洞察', 'JTBD', 'Human-in-the-loop', '隐私设计', '种子用户验证'],
-    link: 'https://github.com/bleakbelladonnals/bondmemo',
+    publicLinks: [{ label: 'GitHub', href: 'https://github.com/bleakbelladonnals/bondmemo', kind: 'github' }],
   },
   {
     slug: 'lumaflow',
@@ -218,6 +364,10 @@ export const cases: CaseStudy[] = [
     category: 'AI WORKFLOW',
     year: '2025–2026',
     featured: false,
+    projectType: 'company-pilot',
+    stage: '内部试运行 · 3 轮原型测试',
+    validationScope: '验证内容创建、问题修正、人工审批、版本管理与多格式交付等核心流程。',
+    metricNotes: '指标来自内部试运行与年化交付口径，不代表外部 SaaS 客户规模。',
     summary:
       '面向出口型 B2B 制造企业，把产品知识、内容策划、生成、事实审核、人工审批与资产复用组织成可追溯流程。',
     audience: '出口型 B2B 制造企业的海外营销与 SEO 内容团队',
@@ -263,7 +413,37 @@ export const cases: CaseStudy[] = [
     ],
     reflection:
       '内容 AI 的壁垒不是生成，而是可信知识、审核规则、过程追溯和内容资产反馈。产能不是北极星，可发布与可复用才是。',
+    workSamples: [
+      {
+        id: 'lumaflow-architecture',
+        type: 'decision',
+        title: '内容中台五模块架构',
+        format: '信息架构 · 5 modules',
+        disclosure: '依据内部规划脱敏重绘',
+        summary: '把内容工作拆为工作台、产品知识、内容生产、审核中心与内容资产。',
+        items: ['知识来源', '生产与审核', '资产复用'],
+      },
+      {
+        id: 'lumaflow-quality-gates',
+        type: 'workflow',
+        title: '发布前质量门',
+        format: '审批流程 · 6 checks',
+        disclosure: '依据试运行流程脱敏重绘',
+        summary: '事实、SEO、格式、品牌和人工审批分别有明确输入、阻断条件与版本记录。',
+        items: ['事实阻断', '规则检查', '人工审批'],
+      },
+      {
+        id: 'lumaflow-model-eval',
+        type: 'evaluation',
+        title: '模型与 Prompt 对比表',
+        format: '评测矩阵 · 6 dimensions',
+        disclosure: '仅展示维度与决策逻辑',
+        summary: '统一比较事实准确、指令遵循、英文表达、长文稳定、时延和单篇成本。',
+        items: ['质量维度', '成本与时延', '场景化结论'],
+      },
+    ],
     capabilities: ['多 Agent 工作流', '内容治理', '模型选型', 'SEO / GEO', '人工审批'],
+    publicLinks: [],
   },
   {
     slug: 'zaowutai',
@@ -272,6 +452,10 @@ export const cases: CaseStudy[] = [
     category: 'AI PRODUCT BUILDER',
     year: '2026',
     featured: false,
+    projectType: 'independent-mvp',
+    stage: '可运行个人 MVP',
+    validationScope: '以限定任务集验证需求收敛、构建交接和验收闭环，30+ 工具出现重复使用。',
+    metricNotes: '首轮可用率与耗时来自定义范围内的产品 benchmark，不代表规模化用户验证。',
     summary:
       '面向没有开发经验的普通人，由 AI 产品搭档带领幕后专业团队，将一个具体麻烦收敛为可执行、可验收的小产品。',
     audience: '有工作、生活、副业或创作问题，但不会写 PRD 或编程的用户',
@@ -316,8 +500,37 @@ export const cases: CaseStudy[] = [
     ],
     reflection:
       '产品文档不是最终价值，它们只是为了让用户在关键决策上有信息、有控制，并让后续构建可验收。',
+    workSamples: [
+      {
+        id: 'zaowutai-idea-brief',
+        type: 'research',
+        title: 'Idea Brief 信息槽位',
+        format: '需求模板 · 7 fields',
+        disclosure: '公开 MVP 方法摘要',
+        summary: '围绕用户、场景、问题、替代方案、成功标准、边界与假设收敛自由表达。',
+        items: ['事实 / 推断分离', '最大信息缺口', '待验证假设'],
+      },
+      {
+        id: 'zaowutai-decision-gates',
+        type: 'decision',
+        title: '共创建设决策门',
+        format: '流程规格 · 3 gates',
+        disclosure: '公开 MVP 方法摘要',
+        summary: '需求确认、范围批准和构建验收三处必须由用户决定，AI 不越权推进。',
+        items: ['Idea Brief', 'Build Spec', '验收结果'],
+      },
+      {
+        id: 'zaowutai-evaluator',
+        type: 'evaluation',
+        title: '构建结果验收回路',
+        format: 'Evaluator–Optimizer',
+        disclosure: '公开 MVP 评测摘要',
+        summary: '以验收清单、接口约束和回归结果收敛 AI Coding，而不是只展示生成速度。',
+        items: ['验收清单', '失败分类', '版本回退'],
+      },
+    ],
     capabilities: ['需求共创', '多 Agent 方法', 'AI Coding', '产品交付', '效果评估'],
-    link: 'https://github.com/bleakbelladonnals/zaowutai',
+    publicLinks: [{ label: 'GitHub', href: 'https://github.com/bleakbelladonnals/zaowutai', kind: 'github' }],
   },
   {
     slug: 'microsoft-mcp',
@@ -326,6 +539,10 @@ export const cases: CaseStudy[] = [
     category: 'OPEN SOURCE',
     year: '2026',
     featured: false,
+    projectType: 'open-source',
+    stage: '2 个 PR 已合并 · 1 个评审中',
+    validationScope: '逐项核对 40+ Azure 服务场景，修复 7 个错误示例并推动关闭 2 个公开问题。',
+    metricNotes: '合并状态与问题关闭状态以公开 GitHub 记录为准。',
     summary:
       '从用户和 AI 助手的实际使用流程出发，修正 Azure 云服务 MCP 文档中“产品功能、使用说明和示例不一致”的问题。',
     audience: '使用 MCP 连接 Azure 云服务的开发者与 AI 助手',
@@ -369,83 +586,133 @@ export const cases: CaseStudy[] = [
     ],
     reflection:
       '对 Agent 产品而言，文档、schema 和示例是产品交互的一部分。提高场景准确性，往往比再增加一层 Prompt 更有价值。',
+    workSamples: [
+      {
+        id: 'mcp-reproduction-matrix',
+        type: 'open-source',
+        title: '40+ 场景复现矩阵',
+        format: '公开记录摘要 · GitHub',
+        disclosure: '以公开仓库与评审状态为准',
+        summary: '逐项核对服务场景、参数语义、文档说明和示例输出，定位可复现的不一致。',
+        items: ['场景与预期', '实际结果', '问题分类'],
+      },
+      {
+        id: 'mcp-parameter-map',
+        type: 'open-source',
+        title: '关键参数语义映射',
+        format: '文档 IA · before / after',
+        disclosure: '公开修改逻辑摘要',
+        summary: '重新组织订阅、租户和默认规则，降低人和 Agent 生成无效调用的概率。',
+        items: ['字段含义', '默认规则', '有效示例'],
+      },
+      {
+        id: 'mcp-review-log',
+        type: 'open-source',
+        title: '评审与合并记录',
+        format: '公开协作 · 3 proposals',
+        disclosure: '2 个已合并，1 个评审中',
+        summary: '记录问题复现、方案收窄、自动检查与维护者反馈，展示真实开源协作过程。',
+        items: ['修改范围', '自动检查', '评审反馈'],
+      },
+    ],
     capabilities: ['开源协作', 'Agent 开发者体验', '文档信息架构', '场景治理'],
-    link: 'https://github.com/microsoft/mcp',
+    publicLinks: [{ label: 'GitHub', href: 'https://github.com/microsoft/mcp', kind: 'github' }],
   },
 ];
 
 export const featuredCases = cases.filter((item) => item.featured);
 
-export const capabilities: CapabilityEvidence[] = [
+export const strengths: Strength[] = [
   {
-    name: '0→1 产品定义',
-    code: 'PRODUCT 0→1',
-    description: '从复杂流程中识别高价值问题，明确 MVP 和被砍需求。',
+    id: 'product-01',
+    name: '企业 AI 0→1',
+    code: 'AI PRODUCT 0→1',
+    description: '从真实业务流程中识别高价值问题，完成产品定义、MVP 取舍、跨团队推进与内部试点。',
     evidence: [
       { project: 'LumiAgent', slug: 'lumiagent', note: '从五条业务流程收敛到三个 MVP 场景' },
-      { project: 'BondMemo', slug: 'bondmemo', note: '从 Personal CRM 收敛到关系事项跟进' },
+      { project: 'LumaFlow', slug: 'lumaflow', note: '把内容生产拆为五个产品模块并推进试运行' },
     ],
   },
   {
-    name: 'Agent 与 Workflow',
-    code: 'AGENT SYSTEM',
-    description: '区分模型理解、知识检索、确定性工具和人工决策。',
+    id: 'agent-eval',
+    name: 'Agent 方案与效果评测',
+    code: 'AGENT & EVALUATION',
+    description: '统筹模型、知识库、任务路由、确定性工具与人工确认，并用分层评测和 bad case 闭环持续优化。',
     evidence: [
-      { project: 'LumiAgent', slug: 'lumiagent', note: 'RAG、结构化查询与规则工具路由' },
-      { project: 'LumaFlow', slug: 'lumaflow', note: '多 Agent 隔离上下文，Workflow 控制顺序' },
+      { project: 'LumiAgent', slug: 'lumiagent', note: '100 条核心评测集、1,000+ SFT 样本与三轮迭代' },
+      { project: 'AgentDock', slug: 'agentdock', note: '围绕状态、人工介入和成本建立可观测模型' },
     ],
   },
   {
-    name: '效果评测',
-    code: 'EVALUATION',
-    description: '将端到端效果拆为可定位的评测层，持续管理 bad case。',
+    id: 'ai-coding-open-source',
+    name: 'AI Coding 与开源实践',
+    code: 'AI CODING & OPEN SOURCE',
+    description: '用 PRD、接口约束、验收清单与回归测试约束 AI Coding，并进入成熟开源项目按规范协作。',
     evidence: [
-      { project: 'LumiAgent', slug: 'lumiagent', note: '100 条回归用例与六层问题归因' },
-      { project: 'LumaFlow', slug: 'lumaflow', note: '事实、指令、长文、时延和成本统一任务集' },
+      { project: 'Microsoft MCP', slug: 'microsoft-mcp', note: '3 个改进方案，2 个已合并并关闭公开问题' },
+      { project: '造物台', slug: 'zaowutai', note: '从需求定义、决策门到构建验收的完整闭环' },
     ],
   },
   {
-    name: '人机协作',
-    code: 'HUMAN-IN-THE-LOOP',
-    description: '让模型生成建议，把责任明确的高风险动作交还给人。',
+    id: 'seo-validation',
+    name: 'SEO 获客与需求验证',
+    code: 'SEO & DEMAND VALIDATION',
+    description: '用搜索词、页面转化、询盘与报价反馈验证需求优先级，再把洞察反哺产品与内容策略。',
     evidence: [
-      { project: 'BondMemo', slug: 'bondmemo', note: '候选提取必须经用户编辑确认' },
-      { project: 'AgentDock', slug: 'agentdock', note: '统一待处理队列与安全恢复' },
+      { project: 'LumaFlow', slug: 'lumaflow', note: '把知识、生成、审核、审批和资产复用组织成产品闭环' },
+    ],
+  },
+];
+
+export const labProjects: LabProject[] = [
+  {
+    slug: 'artifact-harbor',
+    name: 'Artifact Harbor',
+    nameCn: '会话原生产物中心',
+    category: 'DEEPSEEK HARNESS PLUGIN',
+    year: '2026',
+    stage: '探索性插件 · 公开仓库',
+    summary: '让 Agent 生成的报告、网页、图片与 PDF 自动沉淀在当前会话，并保留可追溯的生成上下文。',
+    problem: '文件夹只能保存文件，却很难回答一个产物来自哪次任务、哪条消息、哪个版本，以及之后如何继续使用。',
+    approach: '围绕会话建立产物索引、预览与下载入口，让交付物继续留在任务语境中，而不是脱离上下文成为孤立文件。',
+    validationScope: '公开仓库已提供实现与安全边界；当前证明插件能力，不宣称外部用户验证或商业化。',
+    guardrails: ['限制可读取的产物范围', '保持来源与会话关系可追溯', '不把探索性插件包装成成熟平台'],
+    capabilities: ['Agent 产物管理', '会话上下文', '安全预览', '插件设计'],
+    publicLinks: [
+      { label: 'GitHub', href: 'https://github.com/bleakbelladonnals/dsh-artifact-harbor', kind: 'github' },
     ],
   },
   {
-    name: 'AI Coding 交付',
-    code: 'AI CODING',
-    description: '用 PRD、状态模型、接口约束、验收清单和回归测试约束构建。',
-    evidence: [
-      { project: 'AgentDock', slug: 'agentdock', note: '一周完成窄范围 MVP 与可用性验证' },
-      { project: '造物台', slug: 'zaowutai', note: '从需求定义到验收的 AI 原生交付流程' },
-    ],
-  },
-  {
-    name: '增长与内容治理',
-    code: 'GROWTH & SEO',
-    description: '把搜索需求、产品知识、生成、质量审核和资产复用连成闭环。',
-    evidence: [
-      { project: 'LumaFlow', slug: 'lumaflow', note: '年化 1,500+ 内容交付与审核效率提升' },
-    ],
+    slug: 'dsh-echo',
+    name: 'DSH Echo',
+    nameCn: 'MCP 调用录制回放插件',
+    category: 'DEEPSEEK HARNESS PLUGIN',
+    year: '2026',
+    stage: '探索性插件 · v0.1 可从源码安装',
+    summary: '录制 Agent 的真实 MCP 调用并按需安全回放，降低外部工具调用的复现、调试与回归成本。',
+    problem: 'MCP 调用依赖真实 API、数据库和网络状态，失败时难以区分选错工具、参数错误、服务异常还是协议变化。',
+    approach: '记录工具名、参数、响应、错误与时序，离线回放确定性结果，并用契约快照识别 schema 漂移。',
+    validationScope: '公开仓库包含安装、架构、安全模型与自动化测试记录；仍按插件级验证呈现。',
+    guardrails: ['写操作默认隔离', '记录落盘前进行敏感信息脱敏', '未录制调用默认 fail-closed'],
+    capabilities: ['MCP', 'Record / Replay', '契约测试', '安全与可观测'],
+    publicLinks: [{ label: 'GitHub', href: 'https://github.com/bleakbelladonnals/dsh-echo', kind: 'github' }],
   },
 ];
 
 export const experience = [
   {
     period: '2025.05 — 2026.08',
-    company: '华源五金电镀有限公司',
+    company: '华源科技',
     role: 'AI 产品经理',
     summary:
-      '负责出海市场调研、海外独立站增长及企业 AI 产品从 0 到 1，推动 LumiAgent 与 LumaFlow 进入真实业务。',
+      '负责出海市场研究、海外独立站增长与企业 AI 产品从 0 到 1，推动 LumiAgent 进入内部业务应用，并规划 LumaFlow 内容中台。',
   },
   {
     period: '2024.09 — 2025.02',
-    company: '深圳乐园科技集团',
+    company: '深圳手回科技集团',
     role: '产品运营实习生',
     summary:
-      '围绕镓风险产品做用户需求、信息架构、投保流程与 A/B 测试，单篇内容浏览量超 10 万。',
+      '围绕旅行险产品完成用户需求、信息架构、投保流程与 A/B 测试，实验组页面留存率提升 10%，单篇内容浏览量超 10 万。',
   },
   {
     period: '2021.09 — 2025.06',

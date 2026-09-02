@@ -11,6 +11,8 @@ export function SiteNav() {
       </Link>
       <nav aria-label="Main navigation">
         <Link href="/projects">Case Studies</Link>
+        <Link href="/notes">Notes</Link>
+        <Link href="/?app=desk">Desk</Link>
         <Link href="/about">About</Link>
         <a href={profile.github} target="_blank" rel="noreferrer" aria-label="GitHub"><Code2 /></a>
         <a href={`mailto:${profile.email}`} aria-label="Email Donna"><Mail /></a>

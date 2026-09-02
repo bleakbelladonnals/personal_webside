@@ -1,53 +1,79 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, ExternalLink, FileText, FlaskConical, FolderOpen } from 'lucide-react';
 import { SiteNav } from '@/components/donnaos/site-nav';
-import { cases } from '@/lib/portfolio';
+import { cases, labProjects, projectTypeLabels } from '@/lib/portfolio';
 
 export const metadata: Metadata = {
   title: 'Case Studies — DonnaOS',
-  description: '甘淑琪的企业 AI、Agent 工作流、消费 AI 与开源产品案例。',
-  openGraph: { title: 'Case Studies — DonnaOS', description: '企业 AI、Agent 工作流与 AI 原生产品案例。', images: [] },
-  twitter: { card: 'summary', title: 'Case Studies — DonnaOS', description: '企业 AI、Agent 工作流与 AI 原生产品案例。', images: [] },
+  description: '六个成熟案例与两个 Lab 项目，覆盖企业 AI、Agent 评测、AI Coding、消费 AI 与开源协作。',
+  alternates: { canonical: '/projects' },
+  openGraph: { title: 'Case Studies — DonnaOS', description: '六个成熟案例与两个独立 Lab 项目。', images: [] },
+  twitter: { card: 'summary', title: 'Case Studies — DonnaOS', description: '六个成熟案例与两个独立 Lab 项目。', images: [] },
 };
 
 export default function ProjectsPage() {
   return (
-    <main className="inner-page projects-page">
+    <main className="mac-route-page projects-page">
       <SiteNav />
-      <header className="archive-hero">
-        <div>
-          <p>CASE STUDY ARCHIVE / 2025–2026</p>
-          <h1>用产品决策，<br />而不是技术名词证明能力。</h1>
+      <section className="mac-route-window projects-route-window">
+        <header className="mac-route-titlebar">
+          <span className="mac-route-lights" aria-hidden="true"><i /><i /><i /></span>
+          <strong>Projects</strong>
+          <small>6 CASES + 2 LABS</small>
+        </header>
+        <div className="mac-route-toolbar">
+          <div><FolderOpen aria-hidden="true" /><span>Portfolio</span><b>/</b><strong>All Projects</strong></div>
+          <span>{cases.length + labProjects.length} items</span>
         </div>
-        <p>
-          六个案例覆盖企业 AI、Agent UX、消费 AI、内容工作流、AI 产品构建和开源协作。每个项目都保留问题、边界、评测和反思。
-        </p>
-      </header>
+        <article className="projects-route-document">
+          <header>
+            <p>CASE STUDY LIBRARY · 2025–2026</p>
+            <h1>项目案例</h1>
+            <span>六个成熟案例负责说明交付深度；两个 Lab 项目单独展示正在验证的 Agent 与 MCP 产品假设。</span>
+          </header>
+          <div className="projects-route-list" aria-label="Project case studies">
+            {cases.map((project, index) => (
+              <Link href={`/projects/${project.slug}`} key={project.slug}>
+                <span className="projects-route-file"><FileText aria-hidden="true" /></span>
+                <span className="projects-route-index">{String(index + 1).padStart(2, '0')}</span>
+                <span className="projects-route-copy">
+                  <small>{project.category} · {project.year}</small>
+                  <strong>{project.name}<i>{project.nameCn}</i></strong>
+                  <p>{project.summary}</p>
+                  <span className="projects-route-evidence">{projectTypeLabels[project.projectType]} · {project.stage} · {project.workSamples.length} 份工作样本</span>
+                </span>
+                <ArrowUpRight aria-hidden="true" />
+              </Link>
+            ))}
+          </div>
 
-      <section className="archive-grid" aria-label="Project case studies">
-        {cases.map((project, index) => (
-          <Link className="archive-case-card" href={`/projects/${project.slug}`} key={project.slug}>
-            <div className="archive-window-bar">
-              <span aria-hidden="true"><i /><i /><i /></span>
-              <b>~/projects/{project.slug}</b>
-              <small>{String(index + 1).padStart(2, '0')} / 06</small>
+          <section className="projects-route-lab" aria-labelledby="projects-lab-title">
+            <header>
+              <div><p>LAB / EXPLORATIONS</p><h2 id="projects-lab-title">实验室</h2></div>
+              <span>{labProjects.length} 个公开插件</span>
+            </header>
+            <div>
+              {labProjects.map((project) => (
+                <a href={project.publicLinks[0].href} target="_blank" rel="noreferrer" key={project.slug}>
+                  <FlaskConical aria-hidden="true" />
+                  <span>
+                    <small>{project.category} · {project.year}</small>
+                    <strong>{project.name}</strong>
+                    <p>{project.summary}</p>
+                    <i>{project.stage}</i>
+                  </span>
+                  <ExternalLink aria-hidden="true" />
+                </a>
+              ))}
             </div>
-            <div className="archive-card-copy">
-              <p>{project.category} · {project.year}</p>
-              <h2>{project.name}</h2>
-              <h3>{project.nameCn}</h3>
-              <span>{project.summary}</span>
-              <b>VIEW CASE <ArrowUpRight aria-hidden="true" /></b>
-            </div>
-          </Link>
-        ))}
+          </section>
+        </article>
+        <footer className="mac-route-footer">
+          <span>DonnaOS / Projects</span>
+          <Link href="/about">了解 Donna →</Link>
+        </footer>
       </section>
-
-      <footer className="archive-footer">
-        <span>DONNAOS / CASE STUDIES</span>
-        <Link href="/about">了解我的背景 →</Link>
-      </footer>
     </main>
   );
 }

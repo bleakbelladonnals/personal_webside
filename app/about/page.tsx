@@ -1,72 +1,74 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowUpRight, Code2, Mail, MapPin } from 'lucide-react';
+import { ArrowUpRight, Code2, Mail, MapPin, Users } from 'lucide-react';
 import { SiteNav } from '@/components/donnaos/site-nav';
-import { capabilities, profile } from '@/lib/portfolio';
+import { profile, strengths } from '@/lib/portfolio';
 
 export const metadata: Metadata = {
   title: '关于甘淑琪 — DonnaOS',
-  description: '甘淑琪 Donna Gan，北京 AI 产品经理，关注企业 AI、Agent 工作流与人机协作。',
+  description: '甘淑琪 Donna Gan，北京 AI 产品经理，关注企业 AI 0→1、Agent 评测、AI Coding、开源与 SEO 需求验证。',
+  alternates: { canonical: '/about' },
   openGraph: { title: '关于甘淑琪 — DonnaOS', description: profile.intro, images: [] },
   twitter: { card: 'summary', title: '关于甘淑琪 — DonnaOS', description: profile.intro, images: [] },
 };
 
 export default function AboutPage() {
   return (
-    <main className="inner-page about-page">
+    <main className="mac-route-page about-page">
       <SiteNav />
-      <section className="about-hero">
-        <div className="about-terminal-card">
-          <header><span aria-hidden="true"><i /><i /><i /></span><b>~/about-donna</b></header>
-          <div>
-            <strong>DG</strong>
+      <section className="mac-route-window about-route-window">
+        <header className="mac-route-titlebar">
+          <span className="mac-route-lights" aria-hidden="true"><i /><i /><i /></span>
+          <strong>About Donna</strong>
+          <small>CONTACT CARD</small>
+        </header>
+        <div className="mac-route-toolbar">
+          <div><Users aria-hidden="true" /><span>Contacts</span><b>/</b><strong>Donna Gan</strong></div>
+          <span>{profile.status}</span>
+        </div>
+        <article className="about-route-document">
+          <aside>
+            <Image src="/profile-donna.jpg" alt="甘淑琪 Donna Gan" width={420} height={525} sizes="(max-width: 760px) 120px, 240px" priority />
+            <span><i aria-hidden="true" />{profile.status}</span>
+          </aside>
+          <div className="about-route-copy">
+            <header>
+              <p>AI PRODUCT MANAGER · BEIJING</p>
+              <h1>{profile.nameEn}</h1>
+              <h2>{profile.nameCn}</h2>
+              <span>{profile.intro}</span>
+            </header>
+            <p>
+              风景园林设计训练了我在多个尺度上理解人、环境与路径。转入 AI 产品后，我把这种系统视角用在真实业务流程、Agent 失败路径、评测闭环与人工责任边界上。
+            </p>
+            <p>
+              我不把一次成功 Demo 当作产品完成：企业项目会注明内部试点范围，个人 MVP 会区分自测与用户验证，开源成果则以公开仓库和评审记录为准。
+            </p>
             <dl>
-              <div><dt>name</dt><dd>甘淑琪 Donna Gan</dd></div>
-              <div><dt>role</dt><dd>{profile.role}</dd></div>
-              <div><dt>base</dt><dd>{profile.location}</dd></div>
-              <div><dt>focus</dt><dd>Agent / Workflow / Eval</dd></div>
+              <div><dt>角色</dt><dd>{profile.role}</dd></div>
+              <div><dt>位置</dt><dd><MapPin aria-hidden="true" />{profile.location}</dd></div>
+              <div><dt>方向</dt><dd>企业 AI 0→1 · Agent 评测 · AI Coding · SEO</dd></div>
             </dl>
+            <section className="about-route-capabilities">
+              <header><h2>四项能力与证据</h2><span>{strengths.length} 项</span></header>
+              <div>
+                {strengths.map((strength, index) => (
+                  <Link href={`/projects/${strength.evidence[0].slug}`} key={strength.id}>
+                    <small>{String(index + 1).padStart(2, '0')}</small>
+                    <span><strong>{strength.name}</strong><i>{strength.code}</i></span>
+                    <ArrowUpRight aria-hidden="true" />
+                  </Link>
+                ))}
+              </div>
+            </section>
+            <div className="about-route-actions">
+              <a href={`mailto:${profile.email}`}><Mail aria-hidden="true" />{profile.email}</a>
+              <a href={profile.github} target="_blank" rel="noreferrer"><Code2 aria-hidden="true" />GitHub / @bleakbelladonnals</a>
+            </div>
+            <footer>为保护隐私，本站不公开手机号、微信二维码或简历 PDF 文件。</footer>
           </div>
-        </div>
-        <div>
-          <p>ABOUT DONNA</p>
-          <h1>从空间与行为的设计，<br />走到 AI 产品的系统与边界。</h1>
-          <p className="about-lead">{profile.intro}</p>
-          <p>
-            风景园林设计让我习惯在多个尺度上观察人、环境、路径与长期行为。转入 AI 产品后，这种训练变成了对用户场景、工作流、失败路径与人工介入的系统性关注。
-          </p>
-          <dl>
-            <div><dt>ROLE</dt><dd>{profile.role}</dd></div>
-            <div><dt>BASE</dt><dd><MapPin />{profile.location}</dd></div>
-            <div><dt>STATUS</dt><dd>{profile.status}</dd></div>
-          </dl>
-        </div>
-      </section>
-
-      <section className="about-capabilities">
-        <header><p>CAPABILITIES</p><h2>每一项能力都能回到具体案例。</h2></header>
-        <div>
-          {capabilities.map((capability, index) => (
-            <article key={capability.code}>
-              <span>{String(index + 1).padStart(2, '0')}</span>
-              <p>{capability.code}</p>
-              <h3>{capability.name}</h3>
-              <Link href={`/projects/${capability.evidence[0].slug}`}>VIEW EVIDENCE <ArrowUpRight /></Link>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="contact-callout">
-        <div>
-          <p>LET&apos;S TALK</p>
-          <h2>如果你正在做企业 AI、Agent 工作流，或需要把复杂任务变成可产品化的体验，欢迎联系我。</h2>
-        </div>
-        <div className="contact-buttons">
-          <a href={`mailto:${profile.email}`}><Mail />{profile.email}</a>
-          <a href={profile.github} target="_blank" rel="noreferrer"><Code2 />GitHub / @bleakbelladonnals</a>
-        </div>
-        <small>为保护隐私，本站不公开手机号、微信二维码或简历 PDF。</small>
+        </article>
       </section>
     </main>
   );

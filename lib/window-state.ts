@@ -1,4 +1,4 @@
-export type AppId = 'brief' | 'projects' | 'toolkit' | 'experience' | 'about' | 'contact';
+export type AppId = 'brief' | 'projects' | 'notes' | 'toolkit' | 'experience' | 'about' | 'desk' | 'contact';
 
 export type WindowRecord = {
   id: AppId;
@@ -24,12 +24,14 @@ export type WindowAction =
   | { type: 'MOVE'; id: AppId; x: number; y: number };
 
 const definitions: Record<AppId, Omit<WindowRecord, 'id' | 'open' | 'minimized' | 'z'>> = {
-  brief: { x: 142, y: 70, width: 760, height: 584 },
-  projects: { x: 126, y: 92, width: 680, height: 558 },
-  toolkit: { x: 196, y: 84, width: 600, height: 548 },
-  experience: { x: 252, y: 100, width: 560, height: 520 },
-  about: { x: 306, y: 88, width: 520, height: 492 },
-  contact: { x: 362, y: 112, width: 420, height: 340 },
+  brief: { x: 154, y: 40, width: 820, height: 540 },
+  projects: { x: 116, y: 24, width: 900, height: 600 },
+  notes: { x: 118, y: 24, width: 920, height: 600 },
+  toolkit: { x: 146, y: 36, width: 760, height: 570 },
+  experience: { x: 190, y: 44, width: 680, height: 540 },
+  about: { x: 208, y: 48, width: 720, height: 520 },
+  desk: { x: 154, y: 34, width: 800, height: 560 },
+  contact: { x: 262, y: 72, width: 620, height: 440 },
 };
 
 export function createInitialWindowState(): WindowState {
@@ -42,9 +44,9 @@ export function createInitialWindowState(): WindowState {
         {
           id,
           ...definitions[id],
-          open: id === 'brief',
+          open: false,
           minimized: false,
-          z: id === 'brief' ? 10 : 1,
+          z: 1,
         },
       ]),
     ) as Record<AppId, WindowRecord>,
@@ -86,6 +88,24 @@ export function windowReducer(state: WindowState, action: WindowAction): WindowS
   }
 
   const topZ = state.topZ + 1;
+
+  if (action.type === 'OPEN') {
+    return {
+      topZ,
+      windows: Object.fromEntries(
+        (Object.keys(state.windows) as AppId[]).map((id) => {
+          const record = state.windows[id];
+          return [
+            id,
+            id === action.id
+              ? { ...record, open: true, minimized: false, z: topZ }
+              : { ...record, open: false, minimized: false },
+          ];
+        }),
+      ) as Record<AppId, WindowRecord>,
+    };
+  }
+
   return {
     topZ,
     windows: {
