@@ -1,19 +1,19 @@
-import Link from 'next/link';
 import { Code2, Mail } from 'lucide-react';
+import { InternalLink } from '@/components/donnaos/internal-link';
 import { profile } from '@/lib/portfolio';
 
 export function SiteNav() {
   return (
     <header className="inner-menu-bar">
-      <Link className="inner-brand" href="/">
+      <InternalLink className="inner-brand" href="/">
         <span className="brand-drop" aria-hidden="true">DG</span>
         <strong>DonnaOS</strong>
-      </Link>
+      </InternalLink>
       <nav aria-label="Main navigation">
-        <Link href="/projects">Case Studies</Link>
-        <Link href="/notes">Notes</Link>
-        <Link href="/?app=desk">Desk</Link>
-        <Link href="/about">About</Link>
+        <InternalLink href="/projects">Case Studies</InternalLink>
+        <InternalLink href="/notes">Notes</InternalLink>
+        <InternalLink href="/?app=desk">Desk</InternalLink>
+        <InternalLink href="/about">About</InternalLink>
         <a href={profile.github} target="_blank" rel="noreferrer" aria-label="GitHub"><Code2 /></a>
         <a href={`mailto:${profile.email}`} aria-label="Email Donna"><Mail /></a>
       </nav>

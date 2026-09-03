@@ -27,9 +27,11 @@ const nowItems: Array<{ label: string; title: string; detail: string; app: AppId
 ];
 
 const validIds = new Set<AppId>(apps.map((item) => item.id));
-const onboardingStorageKey = 'donnaos:onboarding:v1';
-const bootLineDelayMs = 420;
-const bootCompleteDelayMs = 700;
+const introSessionStorageKey = 'donnaos:intro-session:v2';
+const guideStorageKey = 'donnaos:guide:v1';
+const bootLineDelayMs = 360;
+const readyHoldMs = 720;
+const unlockTransitionMs = 560;
 const bootLines = [
   'DonnaOS v2.0',
   'loading portfolio kernel........ ok',
@@ -48,11 +50,19 @@ function syncQuery(id?: AppId) {
   window.history.replaceState({}, '', `${url.pathname}${url.search}`);
 }
 
-function rememberOnboarding() {
+function rememberIntroForSession() {
   try {
-    window.localStorage.setItem(onboardingStorageKey, 'complete');
+    window.sessionStorage.setItem(introSessionStorageKey, 'complete');
   } catch {
-    // Strict privacy modes may disable storage; the current visit still remains fully usable.
+    // Strict privacy modes may disable storage; the intro simply plays again next time.
+  }
+}
+
+function rememberGuideDismissal() {
+  try {
+    window.localStorage.setItem(guideStorageKey, 'dismissed');
+  } catch {
+    // The guide remains dismissible for the current visit when storage is unavailable.
   }
 }
 
@@ -144,12 +154,13 @@ function DesktopWindow({
 }
 
 export function DonnaDesktop() {
-  const [phase, setPhase] = useState<'checking' | 'welcome' | 'boot' | 'login' | 'desktop'>('checking');
+  const [phase, setPhase] = useState<'checking' | 'welcome' | 'boot' | 'ready' | 'locked' | 'unlocking' | 'desktop'>('checking');
   const [bootIndex, setBootIndex] = useState(0);
   const [clock, setClock] = useState('--:--:--');
   const [selectedIcon, setSelectedIcon] = useState<AppId | null>(null);
   const [isCoarse, setIsCoarse] = useState(false);
   const [guideDismissed, setGuideDismissed] = useState(false);
+  const [requestedApp, setRequestedApp] = useState<AppId | null>(null);
   const [requestedProjectSlug, setRequestedProjectSlug] = useState<string | undefined>();
   const [closingId, setClosingId] = useState<AppId | null>(null);
   const [minimizingId, setMinimizingId] = useState<AppId | null>(null);
@@ -157,13 +168,12 @@ export function DonnaDesktop() {
   const transitionTimerRef = useRef<number | null>(null);
 
   const unlockDesktop = () => {
-    rememberOnboarding();
-    setPhase('desktop');
+    if (phase === 'locked') setPhase('unlocking');
   };
 
   const dismissGuide = () => {
     setGuideDismissed(true);
-    rememberOnboarding();
+    rememberGuideDismissal();
   };
 
   const activeId = useMemo(() => {
@@ -222,33 +232,31 @@ export function DonnaDesktop() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const requested = params.get('app') as AppId | null;
-    let hasCompletedOnboarding = false;
+    const validRequestedApp = requested && validIds.has(requested) ? requested : null;
+    let hasSeenIntroThisSession = false;
+    let hasDismissedGuide = false;
     try {
-      hasCompletedOnboarding = window.localStorage.getItem(onboardingStorageKey) === 'complete';
+      hasSeenIntroThisSession = window.sessionStorage.getItem(introSessionStorageKey) === 'complete';
     } catch {
-      hasCompletedOnboarding = false;
+      hasSeenIntroThisSession = false;
     }
-    let phaseTimer: number | undefined;
-    if (requested && validIds.has(requested)) {
-      phaseTimer = window.setTimeout(() => {
-        dispatch({ type: 'OPEN', id: requested });
-        setGuideDismissed(true);
-        setPhase('desktop');
-        rememberOnboarding();
-      }, 0);
-    } else {
-      phaseTimer = window.setTimeout(() => {
-        setGuideDismissed(hasCompletedOnboarding);
-        setPhase(hasCompletedOnboarding ? 'login' : 'welcome');
-      }, 0);
+    try {
+      hasDismissedGuide = window.localStorage.getItem(guideStorageKey) === 'dismissed';
+    } catch {
+      hasDismissedGuide = false;
     }
+    const phaseTimer = window.setTimeout(() => {
+      setRequestedApp(validRequestedApp);
+      setGuideDismissed(hasDismissedGuide);
+      setPhase(validRequestedApp || hasSeenIntroThisSession ? 'locked' : 'welcome');
+    }, 0);
 
     const media = window.matchMedia('(pointer: coarse)');
     const updatePointer = () => setIsCoarse(media.matches);
     const pointerTimer = window.setTimeout(updatePointer, 0);
     media.addEventListener('change', updatePointer);
     return () => {
-      if (phaseTimer) window.clearTimeout(phaseTimer);
+      window.clearTimeout(phaseTimer);
       window.clearTimeout(pointerTimer);
       media.removeEventListener('change', updatePointer);
     };
@@ -275,13 +283,42 @@ export function DonnaDesktop() {
       return () => window.clearTimeout(timer);
     }
     const timer = window.setTimeout(() => {
-      setPhase('login');
-    }, bootCompleteDelayMs);
+      rememberIntroForSession();
+      setPhase('ready');
+    }, 0);
     return () => window.clearTimeout(timer);
   }, [phase, bootIndex]);
 
+  useEffect(() => {
+    if (phase !== 'ready') return;
+    const timer = window.setTimeout(() => setPhase('locked'), readyHoldMs);
+    return () => window.clearTimeout(timer);
+  }, [phase]);
+
+  useEffect(() => {
+    if (phase !== 'locked') return;
+    const handleUnlockKey = (event: KeyboardEvent) => {
+      if (event.key !== 'Enter' || event.repeat) return;
+      event.preventDefault();
+      setPhase('unlocking');
+    };
+    window.addEventListener('keydown', handleUnlockKey);
+    return () => window.removeEventListener('keydown', handleUnlockKey);
+  }, [phase]);
+
+  useEffect(() => {
+    if (phase !== 'unlocking') return;
+    const timer = window.setTimeout(() => {
+      if (requestedApp) dispatch({ type: 'OPEN', id: requestedApp });
+      setRequestedApp(null);
+      setPhase('desktop');
+    }, unlockTransitionMs);
+    return () => window.clearTimeout(timer);
+  }, [phase, requestedApp]);
+
   const openWindows = useMemo(() => apps.filter(({ id }) => state.windows[id].open), [state.windows]);
-  const showGuide = !guideDismissed && activeId === null;
+  const guidePending = !guideDismissed && activeId === null;
+  const showGuide = phase === 'desktop' && guidePending;
 
   if (phase === 'checking') return <main className="welcome-screen" aria-busy="true" />;
 
@@ -311,57 +348,38 @@ export function DonnaDesktop() {
     );
   }
 
-  if (phase === 'boot') {
+  if (phase === 'boot' || phase === 'ready') {
+    const isReady = phase === 'ready';
     return (
-      <main className="boot-screen" aria-live="polite">
-        <pre>{bootLines.slice(0, bootIndex).join('\n')}</pre>
-        <div className="boot-progress" aria-hidden="true"><i style={{ width: `${Math.round((bootIndex / bootLines.length) * 100)}%` }} /></div>
+      <main className={`boot-screen${isReady ? ' is-ready' : ''}`} aria-live="polite">
+        <div className="boot-terminal-stage">
+          <pre>{bootLines.slice(0, isReady ? bootLines.length : bootIndex).join('\n')}</pre>
+          {isReady && <strong className="boot-ready">SYSTEM READY</strong>}
+        </div>
+        <div className="boot-progress" aria-hidden="true"><i style={{ width: `${Math.round(((isReady ? bootLines.length : bootIndex) / bootLines.length) * 100)}%` }} /></div>
       </main>
     );
   }
 
-  if (phase === 'login') {
-    return (
-      <main className="login-screen">
-        <time className="login-clock" aria-label={`当前时间 ${clock}`}>{clock}</time>
-        <section className="login-card" aria-labelledby="login-title">
-          <span className="login-avatar" aria-hidden="true">DG</span>
-          <p>DONNAOS USER</p>
-          <h1 id="login-title">Donna Gan</h1>
-          <form
-            className="login-form"
-            onSubmit={(event) => {
-              event.preventDefault();
-              unlockDesktop();
-            }}
-          >
-            <label htmlFor="visitor-password">VISITOR PASSWORD</label>
-            <div>
-              <input
-                id="visitor-password"
-                type="password"
-                value="visitor"
-                readOnly
-                aria-describedby="login-hint"
-              />
-              <button id="unlock-donnaos" type="submit" aria-label="确认访客身份并进入 DonnaOS 桌面">→</button>
-            </div>
-          </form>
-          <small id="login-hint">访客凭证已填入 · 点击密码框后按 Enter，或点箭头解锁</small>
-        </section>
-        <footer>DonnaOS secure boot · visitor session</footer>
-      </main>
-    );
-  }
+  const isLocked = phase === 'locked' || phase === 'unlocking';
+  const requestedAppTitle = requestedApp ? appMeta[requestedApp].title : null;
 
   return (
     <main
-      className="desktop-shell"
-      onPointerDownCapture={dismissGuide}
+      className={[
+        'desktop-shell',
+        isLocked && 'is-locked',
+        phase === 'unlocking' && 'is-unlocking',
+        phase === 'desktop' && 'is-entered',
+      ].filter(Boolean).join(' ')}
+      onPointerDownCapture={() => {
+        if (phase === 'desktop') dismissGuide();
+      }}
       onKeyDownCapture={(event) => {
-        if (event.key === 'Enter' || event.key === ' ') dismissGuide();
+        if (phase === 'desktop' && (event.key === 'Enter' || event.key === ' ')) dismissGuide();
       }}
     >
+      <div className="desktop-surface" aria-hidden={isLocked || undefined} inert={isLocked || undefined}>
       <header className="os-topbar">
         <div>
           <button type="button" onClick={() => openApp('brief')} aria-label="打开 Recruiter Brief">DG</button>
@@ -405,7 +423,7 @@ export function DonnaDesktop() {
           </aside>
         )}
 
-        {!showGuide && activeId === null && (
+        {!guidePending && activeId === null && (
           <aside className="now-widget" aria-label="DonnaOS current updates">
             <header><span>NOW</span><time>2026.09.02</time></header>
             <div>
@@ -456,6 +474,28 @@ export function DonnaDesktop() {
           );
         })}
       </footer>
+      </div>
+
+      {isLocked && (
+        <section className="lock-overlay" aria-labelledby="lock-title" aria-describedby="lock-description">
+          <time className="lock-clock" aria-label={`当前时间 ${clock}`}>{clock}</time>
+          <div className="lock-panel">
+            <span className="lock-avatar" aria-hidden="true">DG</span>
+            <p className="lock-kicker">DONNAOS · VISITOR SESSION</p>
+            <h1 id="lock-title">系统已就绪</h1>
+            <p id="lock-description" className="lock-description">
+              {requestedAppTitle ? `确认访客身份后，将为你打开 ${requestedAppTitle}。` : 'DonnaOS 已完成启动，确认访客身份后进入桌面。'}
+            </p>
+            <button id="unlock-donnaos" className="lock-enter" type="button" onClick={unlockDesktop} disabled={phase === 'unlocking'}>
+              <span>{phase === 'unlocking' ? '正在唤醒桌面' : '以访客身份进入'}</span>
+              <kbd>ENTER</kbd>
+              <b aria-hidden="true">→</b>
+            </button>
+            <small>8 APPS READY · NO PASSWORD REQUIRED</small>
+          </div>
+          <footer><span>DonnaOS secure boot</span><span>guest access enabled</span></footer>
+        </section>
+      )}
     </main>
   );
 }

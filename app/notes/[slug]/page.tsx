@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, ArrowUpRight, BookOpen, ExternalLink, FileText } from 'lucide-react';
+import { InternalLink } from '@/components/donnaos/internal-link';
 import { NoteMarkdown, NoteVisuals, noteHeadingId } from '@/components/donnaos/note-content';
 import { SiteNav } from '@/components/donnaos/site-nav';
 import { getNote, getRelatedCases, noteKindLabels, notes, noteStatusLabels } from '@/lib/notes';
-import { getSiteUrl } from '@/lib/site';
+import { getAbsoluteSiteUrl } from '@/lib/site';
 
 export function generateStaticParams() {
   return notes.map((note) => ({ slug: note.slug }));
@@ -40,7 +40,7 @@ export default async function NotePage({ params }: { params: Promise<{ slug: str
   const noteIndex = notes.findIndex((item) => item.slug === note.slug);
   const nextNote = notes[(noteIndex + 1) % notes.length];
   const relatedCases = getRelatedCases(note);
-  const articleUrl = new URL(`/notes/${note.slug}`, getSiteUrl()).toString();
+  const articleUrl = getAbsoluteSiteUrl(`/notes/${note.slug}`).toString();
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -52,7 +52,7 @@ export default async function NotePage({ params }: { params: Promise<{ slug: str
     articleSection: noteKindLabels[note.kind],
     keywords: note.tags.join(', '),
     mainEntityOfPage: articleUrl,
-    author: { '@type': 'Person', name: 'Donna Gan / 甘淑琪', url: new URL('/about', getSiteUrl()).toString() },
+    author: { '@type': 'Person', name: 'Donna Gan / 甘淑琪', url: getAbsoluteSiteUrl('/about').toString() },
     isBasedOn: note.sources.map((source) => source.href),
   };
 
@@ -70,7 +70,7 @@ export default async function NotePage({ params }: { params: Promise<{ slug: str
           <small>WORKING NOTE {String(noteIndex + 1).padStart(2, '0')}</small>
         </header>
         <div className="mac-route-toolbar note-route-toolbar">
-          <Link href="/notes"><ArrowLeft aria-hidden="true" />全部笔记</Link>
+          <InternalLink href="/notes"><ArrowLeft aria-hidden="true" />全部笔记</InternalLink>
           <div><BookOpen aria-hidden="true" /><span>Notes</span><b>/</b><strong>{noteKindLabels[note.kind]}</strong></div>
           <span>{note.readingMinutes} min read</span>
         </div>
@@ -113,19 +113,19 @@ export default async function NotePage({ params }: { params: Promise<{ slug: str
             <header><p>RELATED WORK</p><h2 id="note-related-title">关联案例</h2></header>
             <div>
               {relatedCases.map((project) => (
-                <Link href={`/projects/${project.slug}`} key={project.slug}>
+                <InternalLink href={`/projects/${project.slug}`} key={project.slug}>
                   <span><small>{project.category}</small><strong>{project.name}</strong><i>{project.nameCn}</i></span>
                   <ArrowUpRight aria-hidden="true" />
-                </Link>
+                </InternalLink>
               ))}
             </div>
           </section>
 
           <footer className="case-document-next note-document-next">
             <span>NEXT NOTE</span>
-            <Link href={`/notes/${nextNote.slug}`}>
+            <InternalLink href={`/notes/${nextNote.slug}`}>
               <small>{noteKindLabels[nextNote.kind]}</small><strong>{nextNote.shortTitle}</strong><ArrowUpRight aria-hidden="true" />
-            </Link>
+            </InternalLink>
           </footer>
         </article>
       </section>

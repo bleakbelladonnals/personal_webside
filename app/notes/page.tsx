@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { ArrowUpRight, BookOpen, FileText, FolderOpen } from 'lucide-react';
+import { InternalLink } from '@/components/donnaos/internal-link';
 import { SiteNav } from '@/components/donnaos/site-nav';
 import { noteKindLabels, notes, noteStatusLabels } from '@/lib/notes';
 
@@ -46,7 +46,7 @@ export default function NotesPage() {
           </header>
           <div className="notes-route-list" aria-label="Product notes">
             {notes.map((note, index) => (
-              <Link href={`/notes/${note.slug}`} key={note.slug}>
+              <InternalLink href={`/notes/${note.slug}`} key={note.slug}>
                 <span className="notes-route-file"><FileText aria-hidden="true" /></span>
                 <span className="notes-route-index">{String(index + 1).padStart(2, '0')}</span>
                 <span className="notes-route-copy">
@@ -59,13 +59,13 @@ export default function NotesPage() {
                   </span>
                 </span>
                 <ArrowUpRight aria-hidden="true" />
-              </Link>
+              </InternalLink>
             ))}
           </div>
         </article>
         <footer className="mac-route-footer">
           <span>DonnaOS / Notes</span>
-          <Link href="/projects">查看项目案例 →</Link>
+          <InternalLink href="/projects">查看项目案例 →</InternalLink>
         </footer>
       </section>
     </main>

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, ArrowUpRight, Check, Code2, FileText, Files, ShieldCheck } from 'lucide-react';
+import { InternalLink } from '@/components/donnaos/internal-link';
 import { SiteNav } from '@/components/donnaos/site-nav';
 import { SystemDiagram } from '@/components/donnaos/system-diagram';
 import { noteKindLabels, notes } from '@/lib/notes';
@@ -43,7 +43,7 @@ export default async function CasePage({ params }: { params: Promise<{ slug: str
           <small>CASE {String(index + 1).padStart(2, '0')} / {String(cases.length).padStart(2, '0')}</small>
         </header>
         <div className="mac-route-toolbar">
-          <Link href="/projects"><ArrowLeft aria-hidden="true" />全部案例</Link>
+          <InternalLink href="/projects"><ArrowLeft aria-hidden="true" />全部案例</InternalLink>
           <div><FileText aria-hidden="true" /><span>Projects</span><b>/</b><strong>{project.name}</strong></div>
           {project.publicLinks[0] ? <a href={project.publicLinks[0].href} target="_blank" rel="noreferrer"><Code2 aria-hidden="true" />{project.publicLinks[0].label}</a> : <span>{project.year}</span>}
         </div>
@@ -156,10 +156,10 @@ export default async function CasePage({ params }: { params: Promise<{ slug: str
               <header><p>RELATED NOTES</p><h2 id="case-related-notes-title">相关产品判断</h2></header>
               <div>
                 {relatedNotes.map((note) => (
-                  <Link href={`/notes/${note.slug}`} key={note.slug}>
+                  <InternalLink href={`/notes/${note.slug}`} key={note.slug}>
                     <span><small>{noteKindLabels[note.kind]}</small><strong>{note.shortTitle}</strong><i>{note.summary}</i></span>
                     <ArrowUpRight aria-hidden="true" />
-                  </Link>
+                  </InternalLink>
                 ))}
               </div>
             </section>
@@ -167,7 +167,7 @@ export default async function CasePage({ params }: { params: Promise<{ slug: str
 
           <footer className="case-document-next">
             <span>NEXT CASE</span>
-            <Link href={`/projects/${next.slug}`}><small>{next.category}</small><strong>{next.name}</strong><ArrowUpRight aria-hidden="true" /></Link>
+            <InternalLink href={`/projects/${next.slug}`}><small>{next.category}</small><strong>{next.name}</strong><ArrowUpRight aria-hidden="true" /></InternalLink>
           </footer>
         </article>
       </section>

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { ArrowUpRight, ExternalLink, FileText, FlaskConical, FolderOpen } from 'lucide-react';
+import { InternalLink } from '@/components/donnaos/internal-link';
 import { SiteNav } from '@/components/donnaos/site-nav';
 import { cases, labProjects, projectTypeLabels } from '@/lib/portfolio';
 
@@ -34,7 +34,7 @@ export default function ProjectsPage() {
           </header>
           <div className="projects-route-list" aria-label="Project case studies">
             {cases.map((project, index) => (
-              <Link href={`/projects/${project.slug}`} key={project.slug}>
+              <InternalLink href={`/projects/${project.slug}`} key={project.slug}>
                 <span className="projects-route-file"><FileText aria-hidden="true" /></span>
                 <span className="projects-route-index">{String(index + 1).padStart(2, '0')}</span>
                 <span className="projects-route-copy">
@@ -44,7 +44,7 @@ export default function ProjectsPage() {
                   <span className="projects-route-evidence">{projectTypeLabels[project.projectType]} · {project.stage} · {project.workSamples.length} 份工作样本</span>
                 </span>
                 <ArrowUpRight aria-hidden="true" />
-              </Link>
+              </InternalLink>
             ))}
           </div>
 
@@ -71,7 +71,7 @@ export default function ProjectsPage() {
         </article>
         <footer className="mac-route-footer">
           <span>DonnaOS / Projects</span>
-          <Link href="/about">了解 Donna →</Link>
+          <InternalLink href="/about">了解 Donna →</InternalLink>
         </footer>
       </section>
     </main>

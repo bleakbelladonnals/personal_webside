@@ -1,11 +1,24 @@
 import { expect, test, type Page } from '@playwright/test';
 
+async function unlockDesktop(page: Page) {
+  await expect(page.locator('#unlock-donnaos')).toBeVisible();
+  await expect(page.locator('.desktop-shell')).toHaveClass(/is-locked/);
+  await expect(page.locator('.desktop-surface')).toHaveAttribute('inert', '');
+  await page.locator('#unlock-donnaos').click();
+  await expect(page.locator('.desktop-shell')).toHaveClass(/is-entered/);
+  await expect(page.locator('.desktop-surface')).not.toHaveAttribute('inert', '');
+}
+
 async function bootToDesktop(page: Page) {
   await page.locator('#enter-donnaos').click();
-  await expect(page.locator('#unlock-donnaos')).toBeVisible();
-  await expect(page.locator('.os-desktop')).toHaveCount(0);
-  await page.locator('#unlock-donnaos').click();
+  await unlockDesktop(page);
   await expect(page.locator('.os-desktop')).toBeVisible();
+}
+
+async function openLockedDeepLink(page: Page, href: string) {
+  await page.goto(href);
+  await expect(page.locator('#enter-donnaos')).toHaveCount(0);
+  await unlockDesktop(page);
 }
 
 test('desktop recruiter flow opens the light Preview and Finder apps', async ({ page }, testInfo) => {
@@ -68,6 +81,8 @@ test('desktop recruiter flow opens the light Preview and Finder apps', async ({ 
   expect(projectWindowFits).toBe(true);
 
   await page.reload();
+  await expect(page.getByText(/将为你打开 Projects/)).toBeVisible();
+  await unlockDesktop(page);
   await expect(page.locator('[data-app-window="projects"]')).toBeVisible();
 
   const aboutIcon = page.locator('[data-desktop-app="about"]');
@@ -93,7 +108,7 @@ test('remaining desktop apps share the light macOS document system', async ({ pa
   ];
 
   for (const app of apps) {
-    await page.goto(`/?app=${app.id}`);
+    await openLockedDeepLink(page, `/?app=${app.id}`);
     const appWindow = page.locator(`[data-app-window="${app.id}"]`);
     await expect(appWindow).toBeVisible();
     await expect(appWindow).toHaveClass(/os-window--light/);
@@ -106,7 +121,7 @@ test('remaining desktop apps share the light macOS document system', async ({ pa
 
 test('Product Notes filters working notes and opens a shareable article', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop', 'desktop interaction');
-  await page.goto('/?app=notes');
+  await openLockedDeepLink(page, '/?app=notes');
 
   const notesWindow = page.locator('[data-app-window="notes"]');
   await expect(notesWindow).toBeVisible();
@@ -185,15 +200,18 @@ test('empty desktop shows Now and opens Donna\'s Desk as a single window', async
   await expect(page.locator('[data-app-window]')).toHaveCount(1);
 });
 
-test('first visit boots through login and return visits require a clean unlock', async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== 'desktop', 'desktop persistence');
+test('new sessions boot fully while same-session visits return to the lock screen', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop', 'desktop session behavior');
   await page.goto('/');
   await expect(page.locator('#enter-donnaos')).toBeVisible();
   await page.locator('#enter-donnaos').click();
+  await expect(page.getByText('SYSTEM READY')).toBeVisible();
   await expect(page.locator('#unlock-donnaos')).toBeVisible();
-  await expect(page.locator('.os-desktop')).toHaveCount(0);
-  await page.locator('#visitor-password').press('Enter');
+  await expect(page.getByText('NO PASSWORD REQUIRED')).toBeVisible();
+  await expect(page.locator('.desktop-surface')).toHaveAttribute('inert', '');
+  await page.keyboard.press('Enter');
   await expect(page.locator('.os-desktop')).toBeVisible();
+  await expect(page.locator('.desktop-shell')).toHaveClass(/is-entered/);
   await expect(page.getByText('双击「recruiter brief」')).toBeVisible();
 
   await page.locator('.os-desktop').click({ position: { x: 600, y: 300 } });
@@ -202,11 +220,28 @@ test('first visit boots through login and return visits require a clean unlock',
 
   await expect(page.locator('#enter-donnaos')).toHaveCount(0);
   await expect(page.locator('#unlock-donnaos')).toBeVisible();
-  await expect(page.locator('.os-desktop')).toHaveCount(0);
-  await page.locator('#unlock-donnaos').click();
+  await unlockDesktop(page);
   await expect(page.locator('.os-desktop')).toBeVisible();
   await expect(page.getByText('双击「recruiter brief」')).toHaveCount(0);
   await expect(page.locator('[data-app-window]')).toHaveCount(0);
+
+  await page.waitForTimeout(900);
+  const runningDecorativeAnimations = await page.evaluate(() => document.getAnimations().filter((animation) => animation.playState === 'running').length);
+  expect(runningDecorativeAnimations).toBe(0);
+
+  await page.evaluate(() => window.sessionStorage.clear());
+  await page.goto('/');
+  await expect(page.locator('#enter-donnaos')).toBeVisible();
+});
+
+test('reduced motion keeps the lock and deep-link flow operable', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop', 'one reduced-motion pass is sufficient');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await openLockedDeepLink(page, '/?app=brief');
+  await expect(page.locator('[data-app-window="brief"]')).toBeVisible();
+
+  const transitionDuration = await page.locator('.desktop-surface').evaluate((node) => getComputedStyle(node).animationDuration);
+  expect(Number.parseFloat(transitionDuration)).toBeLessThanOrEqual(0.001);
 });
 
 test('mobile Finder supports list, preview and back without horizontal overflow', async ({ page }, testInfo) => {
@@ -235,7 +270,7 @@ test('mobile Finder supports list, preview and back without horizontal overflow'
 
 test('mobile Product Notes supports list, preview and back without overflow', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'mobile', 'mobile interaction');
-  await page.goto('/?app=notes');
+  await openLockedDeepLink(page, '/?app=notes');
 
   await expect(page.locator('[data-app-window="notes"]')).toBeVisible();
   await expect(page.locator('.notes-list-pane')).toBeVisible();
@@ -256,7 +291,7 @@ test('mobile Product Notes supports list, preview and back without overflow', as
 
 test('mobile Donna\'s Desk stays readable without horizontal overflow', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'mobile', 'mobile interaction');
-  await page.goto('/?app=desk');
+  await openLockedDeepLink(page, '/?app=desk');
 
   const desk = page.locator('[data-app-window="desk"]');
   await expect(desk).toBeVisible();

@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
-import Link from 'next/link';
 import { ArrowUpRight, Code2, Mail, MapPin, Users } from 'lucide-react';
+import { InternalLink } from '@/components/donnaos/internal-link';
 import { SiteNav } from '@/components/donnaos/site-nav';
 import { profile, strengths } from '@/lib/portfolio';
+import { withBasePath } from '@/lib/site';
 
 export const metadata: Metadata = {
   title: '关于甘淑琪 — DonnaOS',
@@ -29,7 +30,7 @@ export default function AboutPage() {
         </div>
         <article className="about-route-document">
           <aside>
-            <Image src="/profile-donna.jpg" alt="甘淑琪 Donna Gan" width={420} height={525} sizes="(max-width: 760px) 120px, 240px" priority />
+            <Image src={withBasePath('/profile-donna.jpg')} alt="甘淑琪 Donna Gan" width={420} height={525} sizes="(max-width: 760px) 120px, 240px" priority />
             <span><i aria-hidden="true" />{profile.status}</span>
           </aside>
           <div className="about-route-copy">
@@ -54,11 +55,11 @@ export default function AboutPage() {
               <header><h2>四项能力与证据</h2><span>{strengths.length} 项</span></header>
               <div>
                 {strengths.map((strength, index) => (
-                  <Link href={`/projects/${strength.evidence[0].slug}`} key={strength.id}>
+                  <InternalLink href={`/projects/${strength.evidence[0].slug}`} key={strength.id}>
                     <small>{String(index + 1).padStart(2, '0')}</small>
                     <span><strong>{strength.name}</strong><i>{strength.code}</i></span>
                     <ArrowUpRight aria-hidden="true" />
-                  </Link>
+                  </InternalLink>
                 ))}
               </div>
             </section>

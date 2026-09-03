@@ -1,7 +1,7 @@
-import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type { ReactNode } from 'react';
+import { InternalLink } from '@/components/donnaos/internal-link';
 import type { NoteVisual } from '@/lib/notes';
 
 function textFromChildren(children: ReactNode): string {
@@ -50,7 +50,7 @@ export function NoteMarkdown({ body }: { body: string }) {
         components={{
           h2: ({ children }) => <h2 id={noteHeadingId(textFromChildren(children))}>{children}</h2>,
           a: ({ href, children }) => {
-            if (href?.startsWith('/')) return <Link href={href}>{children}</Link>;
+            if (href?.startsWith('/')) return <InternalLink href={href}>{children}</InternalLink>;
             return <a href={href} target="_blank" rel="noreferrer">{children}</a>;
           },
         }}

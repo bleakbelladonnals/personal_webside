@@ -2,7 +2,6 @@
 
 import { useMemo, useState, type KeyboardEvent } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
 import {
   ArrowLeft,
   ArrowUpRight,
@@ -28,6 +27,7 @@ import {
   Users,
   type LucideIcon,
 } from 'lucide-react';
+import { InternalLink } from '@/components/donnaos/internal-link';
 import {
   cases,
   experience,
@@ -40,6 +40,7 @@ import {
   type LabProject,
 } from '@/lib/portfolio';
 import { noteKindLabels, notes, noteStatusLabels, type Note, type NoteKind } from '@/lib/notes';
+import { withBasePath } from '@/lib/site';
 import type { AppId } from '@/lib/window-state';
 
 type OpenAppOptions = { projectSlug?: string };
@@ -124,7 +125,7 @@ function BriefContent({ openApp }: { openApp?: OpenAppHandler }) {
 
       <article className="brief-preview-document">
         <header className="brief-profile-header">
-          <Image className="brief-avatar" src="/profile-donna.jpg" alt="甘淑琪 Donna Gan" width={104} height={104} sizes="52px" priority />
+          <Image className="brief-avatar" src={withBasePath('/profile-donna.jpg')} alt="甘淑琪 Donna Gan" width={104} height={104} sizes="52px" priority />
           <div>
             <div className="brief-name-line">
               <h1>{profile.nameEn}</h1>
@@ -205,7 +206,7 @@ function ProjectsContent({ initialProjectSlug }: { initialProjectSlug?: string }
 
   const openItem = (item: FinderItem) => {
     if (item.kind === 'case') {
-      window.location.assign(`/projects/${item.data.slug}`);
+      window.location.assign(withBasePath(`/projects/${item.data.slug}`));
       return;
     }
     const target = item.data.publicLinks[0]?.href;
@@ -346,9 +347,9 @@ function ProjectsContent({ initialProjectSlug }: { initialProjectSlug?: string }
 
         <div className="quicklook-actions">
           {selectedItem.kind === 'case' && (
-            <Link className="quicklook-primary" href={`/projects/${selectedItem.data.slug}`}>
+            <InternalLink className="quicklook-primary" href={`/projects/${selectedItem.data.slug}`}>
               查看完整案例 <ArrowUpRight aria-hidden="true" />
-            </Link>
+            </InternalLink>
           )}
           {selectedData.publicLinks.map((link, index) => (
             <a
@@ -401,7 +402,7 @@ function NotesContent() {
     setMobilePanel('preview');
   };
 
-  const openNote = (note: Note) => window.location.assign(`/notes/${note.slug}`);
+  const openNote = (note: Note) => window.location.assign(withBasePath(`/notes/${note.slug}`));
   const activeLabel = activeFilter === 'all'
     ? '全部笔记'
     : activeFilter === 'teardown' || activeFilter === 'learning'
@@ -509,11 +510,11 @@ function NotesContent() {
 
         <section className="notes-preview-related" aria-label="关联案例">
           <span>关联案例</span>
-          <div>{relatedCases.map((project) => <Link href={`/projects/${project.slug}`} key={project.slug}>{project.name}<ArrowUpRight aria-hidden="true" /></Link>)}</div>
+          <div>{relatedCases.map((project) => <InternalLink href={`/projects/${project.slug}`} key={project.slug}>{project.name}<ArrowUpRight aria-hidden="true" /></InternalLink>)}</div>
         </section>
 
         <div className="notes-preview-actions">
-          <Link className="notes-preview-primary" href={`/notes/${selectedNote.slug}`}>阅读全文 <ArrowUpRight aria-hidden="true" /></Link>
+          <InternalLink className="notes-preview-primary" href={`/notes/${selectedNote.slug}`}>阅读全文 <ArrowUpRight aria-hidden="true" /></InternalLink>
           <span>{selectedNote.sources.length} 个公开来源</span>
         </div>
       </article>
@@ -548,11 +549,11 @@ function ToolkitContent() {
               </div>
               <div className="capability-library-evidence">
                 {strength.evidence.map((evidence) => (
-                  <Link href={`/projects/${evidence.slug}`} key={`${strength.id}-${evidence.slug}`}>
+                  <InternalLink href={`/projects/${evidence.slug}`} key={`${strength.id}-${evidence.slug}`}>
                     <CheckCircle2 aria-hidden="true" />
                     <span><b>{evidence.project}</b><small>{evidence.note}</small></span>
                     <ArrowUpRight aria-hidden="true" />
-                  </Link>
+                  </InternalLink>
                 ))}
               </div>
             </article>
@@ -600,11 +601,11 @@ function AboutContent({ openApp }: { openApp?: OpenAppHandler }) {
     <div className="about-contacts-app">
       <div className="mac-app-toolbar">
         <div><Users aria-hidden="true" /><span>Contacts</span><b>/</b><strong>Donna Gan</strong></div>
-        <Link href="/about">查看完整资料 <ArrowUpRight aria-hidden="true" /></Link>
+        <InternalLink href="/about">查看完整资料 <ArrowUpRight aria-hidden="true" /></InternalLink>
       </div>
       <article className="about-contact-document">
         <aside className="about-photo-panel">
-          <Image src="/profile-donna.jpg" alt="甘淑琪 Donna Gan" width={380} height={475} sizes="190px" />
+          <Image src={withBasePath('/profile-donna.jpg')} alt="甘淑琪 Donna Gan" width={380} height={475} sizes="190px" />
           <span><i aria-hidden="true" />{profile.status}</span>
         </aside>
         <div className="about-contact-copy">
@@ -694,9 +695,9 @@ function DeskContent({ openApp }: { openApp?: OpenAppHandler }) {
               <header><div><BookOpen aria-hidden="true" /><span><p>READING QUEUE</p><h2>最近整理</h2></span></div><small>{notes.length}</small></header>
               <div>
                 {notes.slice(0, 3).map((note, index) => (
-                  <Link href={`/notes/${note.slug}`} key={note.slug}>
+                  <InternalLink href={`/notes/${note.slug}`} key={note.slug}>
                     <small>{String(index + 1).padStart(2, '0')}</small><span><strong>{note.shortTitle}</strong><i>{noteKindLabels[note.kind]}</i></span><ArrowUpRight aria-hidden="true" />
-                  </Link>
+                  </InternalLink>
                 ))}
               </div>
             </section>
