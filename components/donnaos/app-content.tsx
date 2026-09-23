@@ -575,7 +575,7 @@ function ExperienceContent() {
         <header className="experience-document-heading">
           <p>EXPERIENCE / EDUCATION</p>
           <h1>工作与教育经历</h1>
-          <span>从设计训练出发，逐步进入产品运营、企业 AI 与 Agent 工作流的真实业务落地。</span>
+          <span>从设计训练出发，逐步进入产品设计、企业 AI 与 Agent 工作流的真实业务落地。</span>
         </header>
         <ol className="experience-document-list">
           {experience.map((item, index) => (
@@ -586,11 +586,20 @@ function ExperienceContent() {
                 <h2>{item.company}</h2>
                 <h3>{item.role}</h3>
                 <p>{item.summary}</p>
+                {item.details && (
+                  <ul className="experience-document-details">
+                    {item.details.map((detail) => (
+                      <li key={detail.heading}>
+                        <strong>{detail.heading}：</strong>{detail.body}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </article>
             </li>
           ))}
         </ol>
-        <footer>网页仅展示经历摘要，不公开包含私人联系信息的简历 PDF。</footer>
+        <footer>网页不公开包含私人联系信息的简历 PDF。</footer>
       </article>
     </div>
   );

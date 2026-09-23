@@ -2241,6 +2241,9 @@ svg { stroke-width: 1.8; }
 .experience-document-list h2 { margin: 3px 0 0; color: #29292d; font-size: 14px; font-weight: 680; }
 .experience-document-list h3 { margin: 3px 0 0; color: #5f438f; font-size: 11px; font-weight: 650; }
 .experience-document-list p { margin: 7px 0 0; color: #5d5d62; font-size: 10.5px; line-height: 1.55; }
+.experience-document-details { margin: 7px 0 0; padding-left: 1.4em; color: #5d5d62; font-size: 10.5px; line-height: 1.55; }
+.experience-document-details li + li { margin-top: 5px; }
+.experience-document-details strong { color: #393840; font-weight: 650; }
 .experience-document > footer { margin-top: 14px; color: #8e8e93; font-size: 8.5px; }
 
 .about-contact-document {
@@ -2347,6 +2350,7 @@ svg { stroke-width: 1.8; }
   .experience-document-heading h1 { font-size: 23px; }
   .experience-document-list > li { grid-template-columns: 1fr; gap: 6px; padding-block: 14px; }
   .experience-document-list p { font-size: 10px; }
+  .experience-document-details { font-size: 10px; }
   .about-contact-document { grid-template-columns: 82px minmax(0,1fr); gap: 13px; padding: 17px 13px 22px; }
   .about-photo-panel img { border-radius: 8px; }
   .about-photo-panel > span { font-size: 6.5px; text-align: center; }
