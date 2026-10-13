@@ -10,7 +10,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     ...routes.map((route) => ({
       url: getAbsoluteSiteUrl(route).toString(),
-      lastModified: new Date('2026-09-02'),
+      lastModified: new Date(route === '/notes' ? '2026-09-02' : '2026-10-12'),
       changeFrequency: route === '/' || route === '/notes' ? 'monthly' as const : 'yearly' as const,
       priority: route === '/' ? 1 : route === '/projects' || route === '/notes' ? 0.9 : 0.7,
     })),

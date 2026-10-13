@@ -8,7 +8,7 @@ import { withBasePath } from '@/lib/site';
 
 export const metadata: Metadata = {
   title: '关于甘淑琪 — DonnaOS',
-  description: '甘淑琪 Donna Gan，北京 AI 产品经理，关注企业 AI 0→1、Agent 评测、AI Coding、开源与 SEO 需求验证。',
+  description: '甘淑琪 Donna Gan，北京 AI 产品经理，关注企业 Agent、效果评测、AI Coding 与 GEO 内容增长。',
   alternates: { canonical: '/about' },
   openGraph: { title: '关于甘淑琪 — DonnaOS', description: profile.intro, images: [] },
   twitter: { card: 'summary', title: '关于甘淑琪 — DonnaOS', description: profile.intro, images: [] },
@@ -44,15 +44,15 @@ export default function AboutPage() {
               风景园林设计训练了我在多个尺度上理解人、环境与路径。转入 AI 产品后，我把这种系统视角用在真实业务流程、Agent 失败路径、评测闭环与人工责任边界上。
             </p>
             <p>
-              我不把一次成功 Demo 当作产品完成：企业项目会注明内部试点范围，个人 MVP 会区分自测与用户验证，开源成果则以公开仓库和评审记录为准。
+              我也持续通过独立产品探索新的协作方式。LudoReady 用游戏生成任务检验模型的长链路执行能力，Grokoo 则关注多 Agent 如何通过角色与任务状态融入日常桌面。
             </p>
             <dl>
               <div><dt>角色</dt><dd>{profile.role}</dd></div>
               <div><dt>位置</dt><dd><MapPin aria-hidden="true" />{profile.location}</dd></div>
-              <div><dt>方向</dt><dd>企业 AI 0→1 · Agent 评测 · AI Coding · SEO</dd></div>
+              <div><dt>方向</dt><dd>企业 Agent · 效果评测 · AI Coding · GEO</dd></div>
             </dl>
             <section className="about-route-capabilities">
-              <header><h2>四项能力与证据</h2><span>{strengths.length} 项</span></header>
+              <header><h2>核心能力与项目</h2><span>{strengths.length} 项</span></header>
               <div>
                 {strengths.map((strength, index) => (
                   <InternalLink href={`/projects/${strength.evidence[0].slug}`} key={strength.id}>
@@ -62,6 +62,11 @@ export default function AboutPage() {
                   </InternalLink>
                 ))}
               </div>
+            </section>
+            <section className="about-community">
+              <h2>内容与分享</h2>
+              <p>受邀在北京 Grokbot 线下分享会分享 AI 产品实践，持续在小红书和人人都是产品经理输出产品实践与科普内容，累计 30+ 篇。</p>
+              <a href="https://xhslink.cn/m/8kPzuC70oCq" target="_blank" rel="noreferrer">查看小红书内容 <ArrowUpRight aria-hidden="true" /></a>
             </section>
             <div className="about-route-actions">
               <a href={`mailto:${profile.email}`}><Mail aria-hidden="true" />{profile.email}</a>

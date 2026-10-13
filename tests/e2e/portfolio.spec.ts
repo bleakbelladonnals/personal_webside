@@ -42,9 +42,10 @@ test('desktop recruiter flow opens the light Preview and Finder apps', async ({ 
   await expect(page.locator('[data-app-window="brief"]')).toHaveClass(/os-window--light/);
   await expect(page.getByRole('heading', { name: 'Donna Gan' })).toBeVisible();
   await expect(page.getByRole('img', { name: '甘淑琪 Donna Gan' })).toBeVisible();
-  await expect(page.getByText('12 → 2 min')).toBeVisible();
-  await expect(page.getByText('企业 AI 0→1')).toBeVisible();
-  await expect(page.getByText('AI Coding 与开源实践')).toBeVisible();
+  await expect(page.locator('.brief-projects')).toContainText('LumaFlow');
+  await expect(page.locator('.brief-projects')).toContainText('淘天');
+  await expect(page.locator('.brief-explorations')).toContainText('LudoReady');
+  await expect(page.locator('.brief-explorations')).toContainText('Grokoo');
   await expect(page.getByText(/把复杂 AI 能力/)).toHaveCount(0);
 
   const briefFont = await page.locator('.brief-summary').evaluate((node) => getComputedStyle(node).fontFamily);
@@ -55,15 +56,19 @@ test('desktop recruiter flow opens the light Preview and Finder apps', async ({ 
   await expect(page.locator('[data-app-window="projects"]')).toBeVisible();
   await expect(page.locator('[data-app-window="brief"]')).toHaveCount(0);
   await expect(page.locator('[data-app-window="projects"]')).toHaveClass(/os-window--layout-finder/);
-  await expect(page.locator('.quicklook-heading').getByRole('heading', { name: 'LumiAgent' })).toBeVisible();
+  await expect(page.locator('.quicklook-heading').getByRole('heading', { name: 'LumaFlow' })).toBeVisible();
   await expect(page.getByText(/不只展示/)).toHaveCount(0);
 
   await expect(page.locator('[data-finder-project]')).toHaveCount(3);
-  await page.locator('.finder-sidebar').getByRole('button', { name: /全部案例/ }).click();
+  await page.locator('.finder-sidebar').getByRole('button', { name: /主要项目/ }).click();
   await expect(page.locator('[data-finder-project]')).toHaveCount(6);
+  await expect(page.locator('[data-finder-project="ludoready"]')).toBeVisible();
+  await expect(page.locator('[data-finder-project="grokoo"]')).toBeVisible();
+  await page.locator('.finder-sidebar').getByRole('button', { name: /更多作品/ }).click();
+  await expect(page.locator('[data-finder-project]')).toHaveCount(3);
   await page.locator('[data-finder-project="agentdock"]').click();
   await expect(page.locator('.quicklook-heading').getByRole('heading', { name: 'AgentDock' })).toBeVisible();
-  await expect(page.locator('.quicklook-evidence')).toContainText('个人 MVP');
+  await expect(page.locator('.quicklook-evidence')).toContainText('独立产品');
   await expect(page.locator('.quicklook-primary')).toHaveAttribute('href', '/projects/agentdock');
 
   await page.locator('.finder-sidebar').getByRole('button', { name: /Lab 实验室/ }).click();
@@ -113,6 +118,12 @@ test('remaining desktop apps share the light macOS document system', async ({ pa
     await expect(appWindow).toBeVisible();
     await expect(appWindow).toHaveClass(/os-window--light/);
     await expect(appWindow.getByRole('heading', { name: app.heading })).toBeVisible();
+    if (app.id === 'experience') {
+      await expect(appWindow).toContainText('杭州知径人工智能');
+      await expect(appWindow).toContainText('阿里巴巴');
+      await expect(appWindow).toContainText('2023.12');
+      await expect(appWindow.locator('.experience-document-list > li').last()).toContainText('EDUCATION');
+    }
     if (app.id === 'about') {
       await expect(appWindow.getByRole('img', { name: '甘淑琪 Donna Gan' })).toBeVisible();
     }
@@ -168,15 +179,15 @@ test('case-study deep link exposes decisions, evaluation and sourced results', a
 
   await expect(page.getByRole('heading', { name: 'LumiAgent' })).toBeVisible();
   await expect(page.getByText('PRODUCT DECISIONS')).toBeVisible();
-  await expect(page.getByText('EVALUATION')).toBeVisible();
-  await expect(page.getByText('12 → 2 min')).toBeVisible();
-  await expect(page.getByText('公司内部试点')).toBeVisible();
-  await expect(page.getByText(/1,000\+ 条覆盖标准问法/)).toBeVisible();
-  await expect(page.getByText(/订单金额表示辅助覆盖规模/)).toBeVisible();
-  await expect(page.getByRole('heading', { name: '可检查的产品工作样本' })).toBeVisible();
-  await expect(page.locator('[data-work-sample]')).toHaveCount(3);
-  await expect(page.getByText('MVP 场景优先级矩阵')).toBeVisible();
-  await expect(page.getByText(/不伪造产品截图/)).toBeVisible();
+  await expect(page.getByText('EVALUATION', { exact: true })).toBeVisible();
+  await expect(page.locator('.case-result-grid')).toContainText('40%');
+  await expect(page.locator('.case-evidence-strip')).toContainText('企业项目');
+  await expect(page.locator('.case-document')).toContainText('1,000+');
+  await expect(page.getByRole('heading', { name: '产品流程' })).toBeVisible();
+  await expect(page.locator('.system-diagram')).toBeVisible();
+  await expect(page.getByText(/不伪造产品截图/)).toHaveCount(0);
+  const sections = await page.locator('.case-document-section').evaluateAll((nodes) => nodes.map((node) => node.className));
+  expect(sections[0]).toContain('case-result-section');
 });
 
 test('empty desktop shows Now and opens Donna\'s Desk as a single window', async ({ page }, testInfo) => {
@@ -187,8 +198,8 @@ test('empty desktop shows Now and opens Donna\'s Desk as a single window', async
 
   const now = page.locator('.now-widget');
   await expect(now).toBeVisible();
-  await expect(now.getByText('案例工作样本柜')).toBeVisible();
-  await now.getByRole('button', { name: /Donna's Desk/ }).click();
+  await expect(now.getByText('企业 AI 产品实践')).toBeVisible();
+  await now.getByRole('button', { name: /LudoReady & Grokoo/ }).click();
 
   const desk = page.locator('[data-app-window="desk"]');
   await expect(desk).toBeVisible();
@@ -316,7 +327,9 @@ test('standalone project library separates mature cases from public labs', async
   test.skip(testInfo.project.name !== 'desktop', 'one standalone pass is sufficient');
   await page.goto('/projects');
 
-  await expect(page.locator('.projects-route-list > a')).toHaveCount(6);
+  await expect(page.locator('.projects-route-list').first().locator('a')).toHaveCount(6);
+  await expect(page.locator('.projects-route-list').last().locator('a')).toHaveCount(3);
+  await expect(page.getByRole('heading', { name: '更多作品' })).toBeVisible();
   await expect(page.locator('.projects-route-lab a')).toHaveCount(2);
   await expect(page.getByRole('heading', { name: '实验室' })).toBeVisible();
   await expect(page.getByRole('link', { name: /Artifact Harbor/ })).toHaveAttribute('href', 'https://github.com/bleakbelladonnals/dsh-artifact-harbor');

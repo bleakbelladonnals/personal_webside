@@ -6,10 +6,10 @@ import { cases, labProjects, projectTypeLabels } from '@/lib/portfolio';
 
 export const metadata: Metadata = {
   title: 'Case Studies — DonnaOS',
-  description: '六个成熟案例与两个 Lab 项目，覆盖企业 AI、Agent 评测、AI Coding、消费 AI 与开源协作。',
+  description: '企业 AI 产品、Agent 评测与桌面协作，连接业务落地和独立产品探索。',
   alternates: { canonical: '/projects' },
-  openGraph: { title: 'Case Studies — DonnaOS', description: '六个成熟案例与两个独立 Lab 项目。', images: [] },
-  twitter: { card: 'summary', title: 'Case Studies — DonnaOS', description: '六个成熟案例与两个独立 Lab 项目。', images: [] },
+  openGraph: { title: 'Case Studies — DonnaOS', description: '企业产品、独立探索、开源贡献与更多作品。', images: [] },
+  twitter: { card: 'summary', title: 'Case Studies — DonnaOS', description: '企业产品、独立探索、开源贡献与更多作品。', images: [] },
 };
 
 export default function ProjectsPage() {
@@ -20,7 +20,7 @@ export default function ProjectsPage() {
         <header className="mac-route-titlebar">
           <span className="mac-route-lights" aria-hidden="true"><i /><i /><i /></span>
           <strong>Projects</strong>
-          <small>6 CASES + 2 LABS</small>
+          <small>{cases.length} PROJECTS + {labProjects.length} LABS</small>
         </header>
         <div className="mac-route-toolbar">
           <div><FolderOpen aria-hidden="true" /><span>Portfolio</span><b>/</b><strong>All Projects</strong></div>
@@ -28,25 +28,33 @@ export default function ProjectsPage() {
         </div>
         <article className="projects-route-document">
           <header>
-            <p>CASE STUDY LIBRARY · 2025–2026</p>
+            <p>CASE STUDY LIBRARY · 2024–2026</p>
             <h1>项目案例</h1>
-            <span>六个成熟案例负责说明交付深度；两个 Lab 项目单独展示正在验证的 Agent 与 MCP 产品假设。</span>
+            <span>从企业业务流程到 Agent 协作体验，记录产品判断、关键方案与实际成果。</span>
           </header>
-          <div className="projects-route-list" aria-label="Project case studies">
-            {cases.map((project, index) => (
-              <InternalLink href={`/projects/${project.slug}`} key={project.slug}>
-                <span className="projects-route-file"><FileText aria-hidden="true" /></span>
-                <span className="projects-route-index">{String(index + 1).padStart(2, '0')}</span>
-                <span className="projects-route-copy">
-                  <small>{project.category} · {project.year}</small>
-                  <strong>{project.name}<i>{project.nameCn}</i></strong>
-                  <p>{project.summary}</p>
-                  <span className="projects-route-evidence">{projectTypeLabels[project.projectType]} · {project.stage} · {project.workSamples.length} 份工作样本</span>
-                </span>
-                <ArrowUpRight aria-hidden="true" />
-              </InternalLink>
-            ))}
-          </div>
+          {[
+            { title: '企业产品与独立探索', more: false },
+            { title: '更多作品', more: true },
+          ].map((group) => (
+            <section className="projects-route-group" key={group.title}>
+              <h2>{group.title}</h2>
+              <div className="projects-route-list" aria-label={group.title}>
+                {cases.filter((project) => !!project.more === group.more).map((project, index) => (
+                  <InternalLink href={`/projects/${project.slug}`} key={project.slug}>
+                    <span className="projects-route-file"><FileText aria-hidden="true" /></span>
+                    <span className="projects-route-index">{String(index + 1).padStart(2, '0')}</span>
+                    <span className="projects-route-copy">
+                      <small>{project.category} · {project.year}</small>
+                      <strong>{project.name}<i>{project.nameCn}</i></strong>
+                      <p>{project.summary}</p>
+                      <span className="projects-route-evidence">{projectTypeLabels[project.projectType]} · {project.stage}</span>
+                    </span>
+                    <ArrowUpRight aria-hidden="true" />
+                  </InternalLink>
+                ))}
+              </div>
+            </section>
+          ))}
 
           <section className="projects-route-lab" aria-labelledby="projects-lab-title">
             <header>

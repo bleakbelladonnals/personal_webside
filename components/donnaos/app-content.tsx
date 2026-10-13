@@ -18,7 +18,6 @@ import {
   Folder,
   FolderOpen,
   Grid2X2,
-  Heart,
   Mail,
   MapPin,
   ShieldCheck,
@@ -47,7 +46,7 @@ type OpenAppOptions = { projectSlug?: string };
 type OpenAppHandler = (id: AppId, options?: OpenAppOptions) => void;
 
 type FinderItem = { kind: 'case'; data: CaseStudy } | { kind: 'lab'; data: LabProject };
-type ProjectFilterId = 'featured' | 'all' | 'enterprise' | 'agent' | 'consumer' | 'open-source' | 'lab';
+type ProjectFilterId = 'featured' | 'all' | 'enterprise' | 'agent' | 'consumer' | 'open-source' | 'more' | 'lab';
 type ProjectFilter = {
   id: ProjectFilterId;
   label: string;
@@ -64,34 +63,34 @@ const finderItems: FinderItem[] = [
 
 const projectFilters: ProjectFilter[] = [
   { id: 'featured', label: '精选项目', icon: Star, matches: (item) => item.kind === 'case' && item.data.featured },
-  { id: 'all', label: '全部案例', icon: Grid2X2, matches: (item) => item.kind === 'case' },
+  { id: 'all', label: '主要项目', icon: Grid2X2, matches: (item) => item.kind === 'case' && !item.data.more },
   {
     id: 'enterprise',
     label: '企业 AI',
     icon: Building2,
-    matches: (item) => item.kind === 'case' && ['lumiagent', 'lumaflow'].includes(item.data.slug),
+    matches: (item) => item.kind === 'case' && ['lumaflow', 'lumiagent', 'taotian-ai-designer'].includes(item.data.slug),
   },
   {
     id: 'agent',
     label: 'Agent 产品',
     icon: Bot,
-    matches: (item) => item.kind === 'case' && ['agentdock', 'zaowutai'].includes(item.data.slug),
+    matches: (item) => item.kind === 'case' && ['ludoready', 'grokoo'].includes(item.data.slug),
   },
-  { id: 'consumer', label: '消费 AI', icon: Heart, matches: (item) => item.kind === 'case' && item.data.slug === 'bondmemo' },
   {
     id: 'open-source',
     label: '开源贡献',
     icon: Code2,
     matches: (item) => item.kind === 'case' && item.data.slug === 'microsoft-mcp',
   },
+  { id: 'more', label: '更多作品', icon: Folder, matches: (item) => item.kind === 'case' && !!item.data.more },
   { id: 'lab', label: 'Lab 实验室', icon: FlaskConical, matches: (item) => item.kind === 'lab' },
 ];
 
-const briefEvidence = [
-  { project: 'LumiAgent', value: '12 → 2 min', label: '高频查询中位耗时' },
-  { project: 'LumiAgent', value: '90% / 100 条', label: '核心任务通过率 / 回归集' },
-  { project: 'LumaFlow', value: '64% → 85%', label: '一次审核通过率' },
-];
+const briefEvidence = ['lumaflow', 'lumiagent', 'taotian-ai-designer'].map((slug) => {
+  const project = cases.find((item) => item.slug === slug)!;
+  return { project: project.name, ...project.metrics[0] };
+});
+const independentCases = cases.filter((project) => ['ludoready', 'grokoo'].includes(project.slug));
 
 export const appMeta: Record<
   AppId,
@@ -103,9 +102,9 @@ export const appMeta: Record<
   }
 > = {
   brief: { title: 'Recruiter Brief', code: 'PROFILE', appearance: 'light', layout: 'preview' },
-  projects: { title: 'Projects', code: '6 CASES + 2 LABS', appearance: 'light', layout: 'finder' },
+  projects: { title: 'Projects', code: `${cases.length} PROJECTS + ${labProjects.length} LABS`, appearance: 'light', layout: 'finder' },
   notes: { title: 'Product Notes', code: '3 WORKING NOTES', appearance: 'light', layout: 'notes' },
-  toolkit: { title: 'AI PM Toolkit', code: '4 STRENGTHS', appearance: 'light', layout: 'library' },
+  toolkit: { title: 'AI PM Toolkit', code: `${strengths.length} STRENGTHS`, appearance: 'light', layout: 'library' },
   experience: { title: 'Experience', code: '2021–2026', appearance: 'light', layout: 'resume' },
   about: { title: 'About Donna', code: 'CONTACT CARD', appearance: 'light', layout: 'profile' },
   desk: { title: "Donna's Desk", code: 'NOW / READ / BUILD', appearance: 'light', layout: 'desk' },
@@ -138,12 +137,12 @@ function BriefContent({ openApp }: { openApp?: OpenAppHandler }) {
 
         <p className="brief-summary">{profile.intro}</p>
 
-        <ul className="brief-focus-list" aria-label="四项核心优势">
+        <ul className="brief-focus-list" aria-label="核心优势">
           {strengths.map((strength) => <li key={strength.id}>{strength.name}</li>)}
         </ul>
 
         <section className="brief-evidence" aria-labelledby="brief-evidence-title">
-          <header><h2 id="brief-evidence-title">Selected evidence</h2><span>来源见完整案例</span></header>
+          <header><h2 id="brief-evidence-title">代表成果</h2><span>来源见完整案例</span></header>
           <div>
             {briefEvidence.map((item) => (
               <article key={`${item.project}-${item.label}`}>
@@ -156,7 +155,7 @@ function BriefContent({ openApp }: { openApp?: OpenAppHandler }) {
         </section>
 
         <section className="brief-projects" aria-labelledby="brief-projects-title">
-          <header><h2 id="brief-projects-title">代表项目</h2><span>3 个精选案例</span></header>
+          <header><h2 id="brief-projects-title">代表项目</h2><span>企业产品实践</span></header>
           <div>
             {featuredCases.map((project) => (
               <button
@@ -171,6 +170,14 @@ function BriefContent({ openApp }: { openApp?: OpenAppHandler }) {
             ))}
           </div>
         </section>
+        <section className="brief-explorations" aria-label="独立产品探索">
+          <h2>独立产品探索</h2>
+          {independentCases.map((project) => (
+            <button type="button" key={project.slug} onClick={() => openApp?.('projects', { projectSlug: project.slug })}>
+              <span><strong>{project.name}</strong><small>{project.nameCn}</small></span><ArrowUpRight aria-hidden="true" />
+            </button>
+          ))}
+        </section>
       </article>
     </div>
   );
@@ -179,7 +186,7 @@ function BriefContent({ openApp }: { openApp?: OpenAppHandler }) {
 function ProjectsContent({ initialProjectSlug }: { initialProjectSlug?: string }) {
   const initialProject = cases.find((project) => project.slug === initialProjectSlug) ?? featuredCases[0] ?? cases[0];
   const initialItem = finderItems.find((item) => item.kind === 'case' && item.data.slug === initialProject.slug) ?? finderItems[0];
-  const [activeFilter, setActiveFilter] = useState<ProjectFilterId>(initialProject.featured ? 'featured' : 'all');
+  const [activeFilter, setActiveFilter] = useState<ProjectFilterId>(initialProject.more ? 'more' : initialProject.featured ? 'featured' : 'all');
   const [selectedKey, setSelectedKey] = useState(`${initialItem.kind}:${initialItem.data.slug}`);
   const [mobilePanel, setMobilePanel] = useState<'list' | 'preview'>('list');
 
@@ -313,7 +320,7 @@ function ProjectsContent({ initialProjectSlug }: { initialProjectSlug?: string }
 
         {selectedItem.kind === 'case' ? (
           <>
-            <section className="quicklook-metrics" aria-label="项目指标">
+            {selectedItem.data.metrics.length > 0 && <section className="quicklook-metrics" aria-label="项目指标">
               {selectedItem.data.metrics.slice(0, 2).map((metric) => (
                 <article key={metric.label}>
                   <strong>{metric.value}</strong>
@@ -322,9 +329,10 @@ function ProjectsContent({ initialProjectSlug }: { initialProjectSlug?: string }
                 </article>
               ))}
             </section>
+            }
             <p className="quicklook-metric-note">{selectedItem.data.metricNotes}</p>
-            <section className="quicklook-work-samples" aria-label="项目工作样本">
-              <header><span>工作样本</span><small>{selectedItem.data.workSamples.length} items</small></header>
+            {selectedItem.data.workSamples.length > 0 && <section className="quicklook-work-samples" aria-label="产品设计要点">
+              <header><span>产品设计要点</span><small>{selectedItem.data.workSamples.length} items</small></header>
               <div>
                 {selectedItem.data.workSamples.slice(0, 2).map((sample) => (
                   <article key={sample.id} data-work-sample={sample.id}>
@@ -333,7 +341,7 @@ function ProjectsContent({ initialProjectSlug }: { initialProjectSlug?: string }
                   </article>
                 ))}
               </div>
-            </section>
+            </section>}
           </>
         ) : (
           <ul className="quicklook-lab-guardrails" aria-label="实验项目边界">
@@ -535,7 +543,7 @@ function ToolkitContent() {
           <div>
             <p>CAPABILITY LIBRARY</p>
             <h1>AI PM Toolkit</h1>
-            <span>四项能力对应四类真实证据：业务落地、Agent 评测、AI Coding 开源与增长验证。</span>
+            <span>从企业交付到独立产品，查看产品规划、Agent 工程化、效果评测与开源实践。</span>
           </div>
         </header>
         <div className="capability-library-list">
@@ -575,14 +583,14 @@ function ExperienceContent() {
         <header className="experience-document-heading">
           <p>EXPERIENCE / EDUCATION</p>
           <h1>工作与教育经历</h1>
-          <span>从设计训练出发，逐步进入产品设计、企业 AI 与 Agent 工作流的真实业务落地。</span>
+          <span>围绕企业协同、内容增长与设计生产，将 AI 能力转化为可持续使用的业务产品。</span>
         </header>
         <ol className="experience-document-list">
-          {experience.map((item, index) => (
+          {experience.map((item) => (
             <li key={item.period}>
               <time>{item.period}</time>
               <article>
-                <span>{index === 2 ? 'EDUCATION' : 'WORK EXPERIENCE'}</span>
+                <span>{item.kind === 'education' ? 'EDUCATION' : 'WORK EXPERIENCE'}</span>
                 <h2>{item.company}</h2>
                 <h3>{item.role}</h3>
                 <p>{item.summary}</p>
@@ -629,7 +637,7 @@ function AboutContent({ openApp }: { openApp?: OpenAppHandler }) {
           </p>
           <dl className="about-contact-facts">
             <div><dt>角色</dt><dd>{profile.role}</dd></div>
-            <div><dt>方向</dt><dd>企业 AI 0→1 · Agent 评测 · AI Coding · SEO</dd></div>
+            <div><dt>方向</dt><dd>企业 Agent · 效果评测 · AI Coding · GEO</dd></div>
             <div><dt>位置</dt><dd><MapPin aria-hidden="true" />{profile.location}</dd></div>
           </dl>
           <div className="about-contact-actions">
@@ -645,8 +653,8 @@ function AboutContent({ openApp }: { openApp?: OpenAppHandler }) {
 const deskPrinciples = [
   '先定义任务与通过标准，再讨论模型和功能。',
   '把人工介入、失败恢复与审计记录设计进主流程。',
-  '区分事实、推断与待验证假设，不用 Demo 冒充验证。',
-  '结果、验证范围与指标口径必须一起出现。',
+  '用同一任务集比较模型，把失败归因落实到下一轮迭代。',
+  '从业务效率、使用成本和能力复用判断产品价值。',
 ];
 
 function DeskContent({ openApp }: { openApp?: OpenAppHandler }) {
@@ -654,7 +662,7 @@ function DeskContent({ openApp }: { openApp?: OpenAppHandler }) {
     <div className="desk-app">
       <div className="mac-app-toolbar desk-toolbar">
         <div><FolderOpen aria-hidden="true" /><span>Workspaces</span><b>/</b><strong>Donna&apos;s Desk</strong></div>
-        <small>SYNCED · SEP 02</small>
+        <small>UPDATED · OCT 12</small>
       </div>
       <article className="desk-workspace">
         <aside className="desk-sidebar" data-desk-section="status">
@@ -679,22 +687,22 @@ function DeskContent({ openApp }: { openApp?: OpenAppHandler }) {
 
         <div className="desk-workarea">
           <header className="desk-workarea-heading">
-            <div><p>DESK / 2026.09.02</p><h1>今天的工作台</h1><span>只放正在推进、能直接打开的材料。</span></div>
-            <time dateTime="2026-09-02">WED · 02</time>
+            <div><p>DESK / 2026.10.12</p><h1>今天的工作台</h1><span>只放正在推进、能直接打开的材料。</span></div>
+            <time dateTime="2026-10-12">MON · 12</time>
           </header>
 
           <section className="desk-active-board" data-desk-section="now">
             <header><div><p>ACTIVE</p><h2>现在在做</h2></div><span>2 ITEMS</span></header>
             <div>
-              <button type="button" onClick={() => openApp?.('projects', { projectSlug: 'lumiagent' })}>
-                <span className="desk-task-state">IN REVIEW</span>
-                <span><strong>案例工作样本柜</strong><i>决策记录、流程结构和评测材料已经接入 6 个案例。</i></span>
-                <small>18 / 18</small><ArrowUpRight aria-hidden="true" />
+              <button type="button" onClick={() => openApp?.('projects', { projectSlug: 'ludoready' })}>
+                <span className="desk-task-state">EVALUATION</span>
+                <span><strong>LudoReady</strong><i>以游戏生成任务观察模型在规划、编码与自主修复中的表现。</i></span>
+                <small>10+ MODELS</small><ArrowUpRight aria-hidden="true" />
               </button>
-              <button type="button" onClick={() => openApp?.('notes')}>
-                <span className="desk-task-state is-writing">WRITING</span>
-                <span><strong>Agent 产品判断</strong><i>继续整理评测、人工介入和工作空间设计。</i></span>
-                <small>3 NOTES</small><ArrowUpRight aria-hidden="true" />
+              <button type="button" onClick={() => openApp?.('projects', { projectSlug: 'grokoo' })}>
+                <span className="desk-task-state is-writing">AGENT UX</span>
+                <span><strong>Grokoo</strong><i>通过角色身份、人格行为与任务状态探索桌面协作体验。</i></span>
+                <small>macOS</small><ArrowUpRight aria-hidden="true" />
               </button>
             </div>
           </section>

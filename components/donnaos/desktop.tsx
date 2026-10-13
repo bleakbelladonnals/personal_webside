@@ -21,9 +21,9 @@ const apps: Array<{ id: AppId; label: string; glyph: string }> = [
 ];
 
 const nowItems: Array<{ label: string; title: string; detail: string; app: AppId; projectSlug?: string }> = [
-  { label: 'CURRENT', title: '案例工作样本柜', detail: '六个案例 · 脱敏重绘与公开记录', app: 'projects', projectSlug: 'lumiagent' },
+  { label: 'CURRENT', title: '企业 AI 产品实践', detail: '订单协同 · 内容增长 · 设计生产', app: 'projects', projectSlug: 'lumaflow' },
   { label: 'RECENT', title: '3 篇 Product Notes', detail: '产品拆解 · Agent 评测 · 人工介入', app: 'notes' },
-  { label: 'NEXT', title: "Donna's Desk", detail: '当前关注、阅读与最近构建', app: 'desk' },
+  { label: 'NEXT', title: 'LudoReady & Grokoo', detail: '模型评测与多 Agent 桌面协作', app: 'desk' },
 ];
 
 const validIds = new Set<AppId>(apps.map((item) => item.id));
@@ -425,7 +425,7 @@ export function DonnaDesktop() {
 
         {!guidePending && activeId === null && (
           <aside className="now-widget" aria-label="DonnaOS current updates">
-            <header><span>NOW</span><time>2026.09.02</time></header>
+            <header><span>NOW</span><time>2026.10.12</time></header>
             <div>
               {nowItems.map((item) => (
                 <button type="button" key={item.label} onClick={() => openApp(item.app, { projectSlug: item.projectSlug })}>

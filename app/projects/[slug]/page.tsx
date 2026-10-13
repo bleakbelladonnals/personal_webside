@@ -56,10 +56,22 @@ export default async function CasePage({ params }: { params: Promise<{ slug: str
             <span>{project.summary}</span>
           </header>
 
+          {project.metrics.length > 0 && (
+          <section className="case-document-section case-section-unnumbered case-result-section">
+            <header><div><p>RESULTS</p><h2>项目成果</h2></div></header>
+            <div className="case-result-grid">
+              {project.metrics.map((metric) => (
+                <article key={metric.label}><strong>{metric.value}</strong><h3>{metric.label}</h3><p>{metric.detail}</p></article>
+              ))}
+            </div>
+            {project.metricNotes && <p className="case-metric-note">{project.metricNotes}</p>}
+          </section>
+          )}
+
           <section className="case-evidence-strip" aria-label="项目性质与证据范围">
             <div><span>PROJECT TYPE</span><strong>{projectTypeLabels[project.projectType]}</strong></div>
             <div><span>STAGE</span><strong>{project.stage}</strong></div>
-            <div><span>VALIDATION SCOPE</span><p>{project.validationScope}</p></div>
+            <div><span>PROJECT SCOPE</span><p>{project.validationScope}</p></div>
           </section>
 
           <dl className="case-document-facts">
@@ -68,8 +80,9 @@ export default async function CasePage({ params }: { params: Promise<{ slug: str
             <div><dt>CAPABILITIES</dt><dd>{project.capabilities.join(' · ')}</dd></div>
           </dl>
 
-          <section className="case-document-section case-context-section">
-            <header><span>01</span><div><p>CONTEXT & PROBLEM</p><h2>问题不是从功能清单开始的。</h2></div></header>
+
+          <section className="case-document-section case-section-unnumbered case-context-section">
+            <header><div><p>CONTEXT & PROBLEM</p><h2>场景与问题</h2></div></header>
             <div className="case-document-body">
               <p className="case-lead-copy">{project.context}</p>
               <ul className="case-problem-list">
@@ -78,44 +91,54 @@ export default async function CasePage({ params }: { params: Promise<{ slug: str
             </div>
           </section>
 
-          <section className="case-document-section case-ai-section">
-            <header><span>02</span><div><p>WHY AI</p><h2>AI 负责理解与生成，关键事实和责任不交给它猜。</h2></div></header>
+          {!project.compact && project.whyAi && (
+          <section className="case-document-section case-section-unnumbered case-ai-section">
+            <header><div><p>PRODUCT APPROACH</p><h2>方案思路</h2></div></header>
             <blockquote>{project.whyAi}</blockquote>
           </section>
+          )}
 
-          <section className="case-document-section case-decision-section">
-            <header><span>03</span><div><p>PRODUCT DECISIONS</p><h2>最重要的是选择与边界。</h2></div></header>
+          {!project.compact && project.decisions.length > 0 && (
+          <section className="case-document-section case-section-unnumbered case-decision-section">
+            <header><div><p>PRODUCT DECISIONS</p><h2>关键产品决策</h2></div></header>
             <ol>
               {project.decisions.map((decision, decisionIndex) => (
                 <li key={decision}><span>{String(decisionIndex + 1).padStart(2, '0')}</span><p>{decision}</p></li>
               ))}
             </ol>
           </section>
+          )}
 
-          <section className="case-document-section case-workflow-section">
-            <header><span>04</span><div><p>SYSTEM FLOW</p><h2>从输入到可验收结果。</h2></div></header>
+          {!project.compact && project.workflow.length > 0 && (
+          <section className="case-document-section case-section-unnumbered case-workflow-section">
+            <header><div><p>SYSTEM FLOW</p><h2>产品流程</h2></div></header>
             <SystemDiagram steps={project.workflow} label={project.name} />
           </section>
+          )}
 
-          <section className="case-document-section case-guardrail-section">
-            <header><span>05</span><div><p>HUMAN-IN-THE-LOOP</p><h2>失败路径和人工介入不是补充功能。</h2></div></header>
+          {project.guardrails.length > 0 && (
+          <section className="case-document-section case-section-unnumbered case-guardrail-section">
+            <header><div><p>HUMAN-IN-THE-LOOP</p><h2>异常处理与人工协作</h2></div></header>
             <div>
               {project.guardrails.map((item) => (
                 <article key={item}><ShieldCheck aria-hidden="true" /><p>{item}</p></article>
               ))}
             </div>
           </section>
+          )}
 
-          <section className="case-document-section case-evaluation-section">
-            <header><span>06</span><div><p>EVALUATION</p><h2>定义“完成”，比展示一次成功 Demo 更重要。</h2></div></header>
+          {project.evaluation.length > 0 && (
+          <section className="case-document-section case-section-unnumbered case-evaluation-section">
+            <header><div><p>EVALUATION</p><h2>效果评测与迭代</h2></div></header>
             <div>
               {project.evaluation.map((item) => <article key={item}><Check aria-hidden="true" /><p>{item}</p></article>)}
             </div>
           </section>
+          )}
 
-          <section className="case-document-section case-samples-section">
-            <header><span>07</span><div><p>WORK SAMPLES</p><h2>可检查的产品工作样本</h2></div></header>
-            <p className="case-sample-intro">企业项目只展示依据真实过程脱敏重绘的结构，不伪造产品截图；公开项目以仓库和评审记录为准。</p>
+          {project.workSamples.length > 0 && (
+          <section className="case-document-section case-section-unnumbered case-samples-section">
+            <header><div><p>DESIGN DETAILS</p><h2>产品设计要点</h2></div></header>
             <div className="case-sample-grid">
               {project.workSamples.map((sample) => (
                 <article key={sample.id} data-work-sample={sample.id}>
@@ -132,24 +155,16 @@ export default async function CasePage({ params }: { params: Promise<{ slug: str
               ))}
             </div>
           </section>
+          )}
 
-          <section className="case-document-section case-result-section">
-            <header><span>08</span><div><p>RESULTS</p><h2>结果与指标口径</h2></div></header>
-            <div className="case-result-grid">
-              {project.metrics.map((metric) => (
-                <article key={metric.label}><strong>{metric.value}</strong><h3>{metric.label}</h3><p>{metric.detail}</p></article>
-              ))}
-            </div>
-            <p className="case-metric-note"><strong>口径说明</strong>{project.metricNotes}</p>
-          </section>
 
-          <section className="case-document-reflection">
+          {!project.compact && <section className="case-document-reflection">
             <p>PRODUCT REFLECTION</p>
             <blockquote>{project.reflection}</blockquote>
             {project.publicLinks.map((link) => (
               <a href={link.href} target="_blank" rel="noreferrer" key={link.href}><Code2 aria-hidden="true" />{link.label} <ArrowUpRight aria-hidden="true" /></a>
             ))}
-          </section>
+          </section>}
 
           {relatedNotes.length > 0 && (
             <section className="case-related-notes" aria-labelledby="case-related-notes-title">
